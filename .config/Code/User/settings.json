@@ -1,0 +1,155 @@
+{
+
+    //----------------------------------------------------------
+    // vscodeのeditorの設定
+    //----------------------------------------------------------
+    "editor.fontSize": 14, // フォントサイズ
+    "editor.rulers": [79, 119], // Editorに表示するライン
+    "editor.wordWrap": "on", // コードの一行が長くなるための可読性向上
+    "editor.minimap.enabled": true, // ミニマップは見たい
+    "editor.insertSpaces": true, // tab キーを押すとスペースが挿入されます。
+    "editor.tabSize": 4, // tabをデフォルトで4スペースにする
+    "editor.renderWhitespace": "all", // エディターで空白文字を表示する方法を制御します。'none'、'boundary' および 'all' が使用可能です。'boundary' オプションでは、単語間の単一スペースは表示されません。
+    "editor.formatOnSave": false, // 時間のかかるフォーマットだとバグが出るのでfalse
+    "breadcrumbs.enabled": true, //エディターで開くパンくずの設定
+
+    //----------------------------------------------------------
+    // vscodeのterminalの設定
+    //----------------------------------------------------------
+    "terminal.integrated.inheritEnv": false,
+
+    //----------------------------------------------------------
+    // vscodeの検索系
+    //----------------------------------------------------------
+    // 検索除外対象のディレクトリ
+    "search.exclude": {
+        "**/env": true,
+        "tags":true,
+        "**/.git": true,
+        "**/__pycache__": true,
+    },
+
+    //----------------------------------------------------------
+    // vscodeのfileの設定
+    //----------------------------------------------------------
+    "files.associations": {
+        "*.sql": "sql",
+        "*.vue": "vue"
+    },
+    "files.autoGuessEncoding": false, // 有効な場合、ファイルを開くときに文字セット エンコードを推測します。言語ごとに構成することも可能
+    "files.trimFinalNewlines": false, // 有効にすると、ファイルの保存時に最終行以降の新しい行をトリミングします。
+    "files.trimTrailingWhitespace": true, // 有効にすると、ファイルの保存時に末尾の空白をトリミングします。
+    // ファイル監視から除外するファイル
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,
+        "**/.svn/**":true,
+    },
+
+    //----------------------------------------------------------
+    // vscodeのバージョン管理系
+    //----------------------------------------------------------
+    // ソース管理プロバイダーのセクションを常に表示するかどうか。
+    "scm.alwaysShowProviders": true,
+
+    //----------------------------------------------------------
+    // vscodeの作業環境の設定(おもにタブの設定をvimと近づけるために設定)
+    //----------------------------------------------------------
+    // エディターのラベルの書式を制御します。例としてこの設定を変更することでファイルの場所を理解しやすくなります:
+    // - short: 'parent'
+    // - medium: 'workspace/src/parent'
+    // - long: '/home/user/workspace/src/parent'
+    // - default: '.../parent', 　別タブで、同じタイトルを共有する場合や、相対的なワークスペース パス タブが無効になっている場合
+    "workbench.editor.labelFormat": "short",
+    // 任意の表示グループが開かれた場合に、そこにエディターを表示するかどうかを制御します。無効にした場合、エディターは現在のアクティブなエディター グループに優先して開かれます。有効にした場合は、現在のアクティブなエディター グループにもう一度開くのではなく、既に開いているエディターが表示されます。特定のグループ内や現在アクティブなグループの横に強制的にエディターを開いた場合などに、この設定が無視される場合もあることにご注意ください。
+    "workbench.editor.revealIfOpen": true,
+    "workbench.editor.showIcons": false, // 開いているエディターをアイコンで表示するかどうかを制御します。これには、アイコンのテーマを有効にする必要もあります。
+    "workbench.editor.highlightModifiedTabs": true, // 編集中のタブをハイライト
+    "workbench.editor.tabSizing": "shrink", // エディターのタブの大きさを制御します。常に完全なエディター ラベルを表示するのに足りるタブの大きさを維持するには 'fit' を設定します。すべてのタブを一度に表示するには利用可能なスペースが足りない場合に、タブを縮小可能にするには 'shrink' を設定します。
+    "workbench.editor.tabCloseButton": "off", // エディター タブの閉じるボタンの位置を制御するか、[off] に設定した場合に無効にします。
+    // todo エディターグループにアクティブなエディターが一つしか存在できない
+    // 前のセッションからエディターが復元されていない場合に、起動時に表示するかどうかを制御します。'none' を選択するとエディターなしで開始します。'welcomepage' を選択するとウェルカム ページを開きます (既定)。'newuntitledfile' を選択すると新しい無題のファイルを開きます (空のワークスペースを開いているときのみ)。
+    "workbench.startupEditor": "none",
+    // エディターを開く場所を制御します。'left' または 'right' を選択すると現在アクティブになっているエディターの左または右にエディターを開きます。'first' または 'last' を選択すると現在アクティブになっているエディターとは別個にエディターを開きます。
+    "workbench.editor.openPositioning": "first",
+    "workbench.activityBar.visible": true, // アクティビティバーは生じしたい
+    "workbench.list.automaticKeyboardNavigation": false, // サイドバーのツリー検索でデフォルトの挙動をoffにする
+    "explorer.openEditors.visible": 0, // [開いているエディター] ウィンドウに表示するエディターの数。
+
+    //----------------------------------------------------------
+    //ワンセット
+    "workbench.editor.showTabs": true, //タブで見えるようにしないと何が開いているのかわからない
+    "workbench.editor.enablePreview": true,
+    "workbench.editor.enablePreviewFromQuickOpen": true,
+    // { "key": "cmd+w", "command": "workbench.action.closeeditorsingroup" }
+    // { "key": "ctrl+tab", "command": "workbench.action.openpreviouseditorfromhistory" },
+    // { "key": "ctrl+tab", "command": "workbench.action.quickopennavigatenext", "when": "inquickopen" },
+    //----------------------------------------------------------
+
+
+    //----------------------------------------------------------
+    // vscodeのdebugの設定
+    //----------------------------------------------------------
+    // デバッグ中にエディターの行内に変数値を表示します
+    "debug.inlineValues": true,
+
+    //----------------------------------------------------------
+    // vscodeのwindowの設定
+    //----------------------------------------------------------
+    "window.zoomLevel": 0,
+
+    //----------------------------------------------------------
+    // vscodeのterminalの設定
+    //----------------------------------------------------------
+    "terminal.integrated.copyOnSelection": true, // 設定した場合、ターミナルで選択しているテキストはクリップボードにコピーされます。
+    "terminal.integrated.fontSize": 14, // ターミナルのフォントサイズ
+
+    //-----------------------------------------------------------------------------------------------------------
+    // installした拡張の設定
+    //-----------------------------------------------------------------------------------------------------------
+
+    //----------------------------------------------------------
+    // vscode vimの設定
+    //----------------------------------------------------------
+    "vim.useSystemClipboard": false, // systemのclipboardを使用しません
+    "vim.hlsearch": true, // hlsearchは必要だと思う
+    "vim.easymotion": true, // 検索をするときに見やすいモッサりすることなければこのまま
+    "vim.visualstar": true, // wordを* or + で検索するでしょ?
+    "vim.useCtrlKeys": true,
+    "vim.ignorecase": true, // ignore case in search patterns.
+    "vim.incsearch": true, // show where a / search matches as you type it.
+    "vim.sneak": true, // enable the sneak plugin for vim.
+
+    //----------------------------------------------------------
+    // todo-treeの設定
+    //----------------------------------------------------------
+    "todo-tree.tree.showScanModeButton": false,
+
+    //----------------------------------------------------------
+    // pythonの設定
+    //----------------------------------------------------------
+    "python.analysis.typeCheckingMode": "basic",
+    "autoDocstring.docstringFormat": "numpy",
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": true,
+    "python.linting.lintOnSave": true,
+    "python.condaPath": "~/miniconda3/bin",
+    "python.pythonPath": "~/miniconda3/envs/vscode-py/bin",
+    "python.autoComplete.addBrackets": true,
+    // 独自ライブラリとか参照で追加したいパス
+    "python.autoComplete.extraPaths": [
+
+    ],
+
+    //----------------------------------------------------------
+    // 補完系の設定
+    //----------------------------------------------------------
+    "editor.suggestSelection": "first",
+    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+    "python.languageServer": "Pylance",
+    "python.analysis.extraPaths": [],
+    "python.analysis.completeFunctionParens": true,
+
+    // 画面から設定した場合はここ以降に追加されるので適宜移動させること.
+}
