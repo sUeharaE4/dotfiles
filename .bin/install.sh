@@ -1,7 +1,5 @@
 #/bin/bash
 
-set -ex
-
 DOTFILE_DIR=$(cd $(dirname $0);cd ../; pwd)
 cd ${DOTFILE_DIR}
 
@@ -11,6 +9,7 @@ BACKUP_DIR=${HOME}/backup_${EXEC_DATETIME}
 echo "exec datetime: ${BACKUP_DIR}"
 echo "your dotfiles are copied to ${EXEC_DATETIME}"
 echo "please remove backup when you feel anything alright"
+
 mkdir ${BACKUP_DIR}
 
 for f in .??*
