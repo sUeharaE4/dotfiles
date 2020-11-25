@@ -7,7 +7,7 @@ repo = 'scrooloose/nerdtree'
 [[plugins]]
 repo = 'airblade/vim-gitgutter'
 
-# # dev icon is a little bit heaby for my chromebook
+# # dev icon is a little bit heavy for my chromebook
 # [[plugins]]
 # repo = 'ryanoasis/vim-devicons'
 
@@ -32,11 +32,12 @@ build_on = '''
 [[plugins]]
 repo = 'junegunn/fzf.vim'
 
-[[plugins]]
-repo = 'prabirshrestha/vim-lsp'
-
-[[plugins]]
-repo = 'mattn/vim-lsp-settings'
+# # lsp is a little bit heavy for my chromebook
+# [[plugins]]
+# repo = 'prabirshrestha/vim-lsp'
+#
+# [[plugins]]
+# repo = 'mattn/vim-lsp-settings'
 
 [[plugins]]
 repo = 'prabirshrestha/async.vim'
@@ -44,8 +45,9 @@ repo = 'prabirshrestha/async.vim'
 [[plugins]]
 repo = 'prabirshrestha/asyncomplete.vim'
 
-[[plugins]]
-repo = 'prabirshrestha/asyncomplete-lsp.vim'
+# [[plugins]]
+# repo = 'prabirshrestha/asyncomplete-lsp.vim'
 
 [[plugins]]
 repo = 'simeji/winresizer'
+
