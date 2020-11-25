@@ -5,6 +5,7 @@ cd ${DOTFILE_DIR}
 
 EXEC_DATETIME=$(date +%Y%m%d_%H%M%S)
 BACKUP_DIR=${HOME}/backup_${EXEC_DATETIME}
+DEIN_DIR=${HOME}/.cache/dein
 
 # check requirements
 if ! command -v curl &> /dev/null
@@ -62,4 +63,15 @@ then
   fi
 fi
 
-
+if [ ! -e ${DEIN_DIR} ]; then
+  echo "${DEIN_DIR} is not exists."
+  echo "you may not have dein which plugin manager of vim."
+  read -n1 -p "install dein? [y/n] >" install_dein
+  if [[ "${install_dein}" = [Yy] ]]; then
+    curl \
+    https://raw.githubusercontent.com/Shougo/dein.vim/master/bin/installer.sh \
+    > dein_installer.sh
+    sh ./dein_installer.sh ${DEIN_DIR}
+    rm -rf ./dein_installer.sh
+  fi
+fi
