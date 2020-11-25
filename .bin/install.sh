@@ -55,8 +55,8 @@ done
 if ! command -v fzf &> /dev/null
 then
   echo "fzf could not be found. some git aliase needs fzf"
-  read -p "install fzf? [yes/no] >" install_fzf
-  if [ "${install_fzf}" in [Yy]|[Yy][Ee][Ss] ]; then
+  read -n1 -p "install fzf? [y/n] >" install_fzf
+  if [[ "${install_fzf}" = [Yy] ]]; then
     git clone https://github.com/junegunn/fzf.git ~/.fzf
     ~/.fzf/install
   fi
