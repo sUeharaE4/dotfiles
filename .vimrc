@@ -38,8 +38,7 @@ nnoremap k gk
 syntax enable
 
 " 80 line
-set textwidth=79
-set colorcolumn=+1
+set colorcolumn=80,120
 " highlight ColorColumn guibg=#202020 ctermbg=lightgray
 highlight ColorColumn guibg=#202020 ctermbg=darkgray
 
