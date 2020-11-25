@@ -34,6 +34,7 @@ do
   if [ -f ${HOME}/$f ]; then
     cp -RL $f ${BACKUP_DIR}/$f
     echo "$f is copied to backup directory"
+    cp -f $f $HOME/$f
     ln -snfv ${DOTFILE_DIR}/$f $HOME/$f
   fi
   if [ -d $f ]; then
@@ -43,6 +44,8 @@ do
         mkdir -p ${BACKUP_DIR}/$(dirname ${filepath})
         cp -RL ${filepath} ${BACKUP_DIR}/${filepath}
         echo "${filepath} is copied to backup directory"
+        mkdir -p ${HOME}/$(dirname ${filepath})
+        cp -f ${filepath} $HOME/${filepath}
       fi
       ln -snfv ${DOTFILE_DIR}/${filepath} $HOME/${filepath}
     done
