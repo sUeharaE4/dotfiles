@@ -1,3 +1,7 @@
 [[plugins]]
 repo = 'rcmdnk/vim-markdown'
 on_ft = ['md', 'markdown']
+
+[[plugins]]
+repo = 'heavenshell/vim-pydocstring'
+on_ft = ['py']

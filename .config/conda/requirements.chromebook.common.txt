@@ -6,6 +6,7 @@ tqdm
 flake8
 flake8-docstrings
 pyls
+doq
 
 pytest
 pytest-mock
