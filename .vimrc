@@ -119,9 +119,9 @@ endif
 "open NERDTree always
 autocmd vimenter * NERDTree
 
-" window resize
+" ### window resize ###
 let g:winresizer_horiz_resize = 1
 let g:winresizer_vert_resize = 1
-" generate docstring with python scripts numpy style
+" ### generate docstring with python scripts numpy style ###
 let g:pydocstring_doq_path = '~/miniconda3/envs/vscode-py/bin/doq'
 let g:pydocstring_formatter = 'numpy'
