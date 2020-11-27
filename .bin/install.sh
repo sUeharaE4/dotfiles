@@ -5,6 +5,7 @@ cd ${DOTFILE_DIR}
 
 EXEC_DATETIME=$(date +%Y%m%d_%H%M%S)
 BACKUP_DIR=${HOME}/backup_${EXEC_DATETIME}
+DEIN_DIR=${HOME}/.cache/dein
 
 # check requirements
 if ! command -v curl &> /dev/null
@@ -34,6 +35,7 @@ do
   if [ -f ${HOME}/$f ]; then
     cp -RL $f ${BACKUP_DIR}/$f
     echo "$f is copied to backup directory"
+    cp -f $f $HOME/$f
     ln -snfv ${DOTFILE_DIR}/$f $HOME/$f
   fi
   if [ -d $f ]; then
@@ -43,6 +45,8 @@ do
         mkdir -p ${BACKUP_DIR}/$(dirname ${filepath})
         cp -RL ${filepath} ${BACKUP_DIR}/${filepath}
         echo "${filepath} is copied to backup directory"
+        mkdir -p ${HOME}/$(dirname ${filepath})
+        cp -f ${filepath} $HOME/${filepath}
       fi
       ln -snfv ${DOTFILE_DIR}/${filepath} $HOME/${filepath}
     done
@@ -52,11 +56,22 @@ done
 if ! command -v fzf &> /dev/null
 then
   echo "fzf could not be found. some git aliase needs fzf"
-  read -p "install fzf? [yes/no] >" install_fzf
-  if [ "${install_fzf}" in [Yy]|[Yy][Ee][Ss] ]; then
+  read -n1 -p "install fzf? [y/n] >" install_fzf
+  if [[ "${install_fzf}" = [Yy] ]]; then
     git clone https://github.com/junegunn/fzf.git ~/.fzf
     ~/.fzf/install
   fi
 fi
 
-
+if [ ! -e ${DEIN_DIR} ]; then
+  echo "${DEIN_DIR} is not exists."
+  echo "you may not have dein which plugin manager of vim."
+  read -n1 -p "install dein? [y/n] >" install_dein
+  if [[ "${install_dein}" = [Yy] ]]; then
+    curl \
+    https://raw.githubusercontent.com/Shougo/dein.vim/master/bin/installer.sh \
+    > dein_installer.sh
+    sh ./dein_installer.sh ${DEIN_DIR}
+    rm -rf ./dein_installer.sh
+  fi
+fi
