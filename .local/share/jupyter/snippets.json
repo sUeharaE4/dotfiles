@@ -1,0 +1,20 @@
+{
+    "snippets" : [
+        {
+            "name" : "load css",
+            "code" : [
+                 "from IPython.display import display, HTML",
+                 "css = !wget https://raw.githubusercontent.com/lapis-zero09/jupyter_notebook_tips/master/css/jupyter_notebook/monokai.css -q -O -",
+                 "css = '\\n'.join(css)",
+                 "display(HTML('<style type=\"text/css\">%s</style>'%css))"
+            ]
+        },
+        {
+            "name": "modify plot stype",
+            "code": [
+                "from jupyterthemes import jtplot",
+                "jtplot.style(theme='monokai')"
+            ]
+        }
+    ]
+}
