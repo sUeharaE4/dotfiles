@@ -54,3 +54,6 @@ repo = 'mattn/vim-lsp-settings'
 
 [[plugins]]
 repo = 'simeji/winresizer'
+
+[[plugins]]
+repo = 'nelstrom/vim-visual-star-search'
