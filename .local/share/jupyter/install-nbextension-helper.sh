@@ -7,6 +7,5 @@ then
   exit 1
 fi
 
-echo "jupyter notebook --generate-config"
 echo "pip install jupyter_contrib_nbextensions"
 echo "jupyter contrib nbextension install --user"
