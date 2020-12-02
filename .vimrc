@@ -125,3 +125,5 @@ let g:winresizer_vert_resize = 1
 " ### generate docstring with python scripts numpy style ###
 let g:pydocstring_doq_path = '~/miniconda3/envs/vscode-py/bin/doq'
 let g:pydocstring_formatter = 'numpy'
+
+call dein#recache_runtimepath()

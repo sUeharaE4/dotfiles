@@ -57,3 +57,6 @@ repo = 'simeji/winresizer'
 
 [[plugins]]
 repo = 'nelstrom/vim-visual-star-search'
+
+[[plugins]]
+repo = 'haishanh/night-owl.vim'
