@@ -42,6 +42,8 @@ set colorcolumn=80,120
 " highlight ColorColumn guibg=#202020 ctermbg=lightgray
 highlight ColorColumn guibg=#202020 ctermbg=darkgray
 
+" default behavier of opening new window
+set splitright
 
 " Tab系
 " 不可視文字を可視化(タブが「▸-」と表示される)
@@ -125,5 +127,8 @@ let g:winresizer_vert_resize = 1
 " ### generate docstring with python scripts numpy style ###
 let g:pydocstring_doq_path = '~/miniconda3/envs/vscode-py/bin/doq'
 let g:pydocstring_formatter = 'numpy'
+" ### preview markdown ###
+let g:preview_markdown_vertical = 1
+let g:preview_markdown_auto_update = 1
 
 call dein#recache_runtimepath()

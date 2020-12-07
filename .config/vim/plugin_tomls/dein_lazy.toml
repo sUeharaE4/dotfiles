@@ -1,5 +1,9 @@
+# [[plugins]]
+# repo = 'rcmdnk/vim-markdown'
+# on_ft = ['md', 'markdown']
+
 [[plugins]]
-repo = 'rcmdnk/vim-markdown'
+repo = 'skanehira/preview-markdown.vim'
 on_ft = ['md', 'markdown']
 
 [[plugins]]

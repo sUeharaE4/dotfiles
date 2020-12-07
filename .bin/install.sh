@@ -75,3 +75,17 @@ if [ ! -e ${DEIN_DIR} ]; then
     rm -rf ./dein_installer.sh
   fi
 fi
+
+if ! command -v mdr &> /dev/null
+then
+  echo "mdr could not be found. vim markdown preview is need mdr"
+  read -n1 -p "install mdr? [y/n] >" install_mdr
+  if [[ "${install_mdr}" = [Yy] ]]; then
+    curl -L https://github.com/MichaelMure/mdr/releases/download/v0.2.5/mdr_linux_amd64 -o mdr_linux_amd64
+    sudo chmod +x mdr_linux_amd64
+    sudo mv mdr_linux_amd64 /usr/local/bin/mdr
+  fi
+fi
+
+
+# https://github.com/MichaelMure/mdr/releases/download/v0.2.5/mdr_linux_amd64
