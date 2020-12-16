@@ -87,3 +87,11 @@ then
   fi
 fi
 
+if ! command -v ctags &> /dev/null
+then
+  echo "ctags could not be found. vim tag jump is need ctags"
+  echo "to install ctags run command bellow"
+  echo "Debean: apt-get install exuberant-ctags"
+  echo "RedHat: yum install ctags"
+fi
+
