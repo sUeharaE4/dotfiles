@@ -87,5 +87,3 @@ then
   fi
 fi
 
-
-# https://github.com/MichaelMure/mdr/releases/download/v0.2.5/mdr_linux_amd64
