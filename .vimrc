@@ -130,5 +130,16 @@ let g:pydocstring_formatter = 'numpy'
 " ### preview markdown ###
 let g:preview_markdown_vertical = 1
 let g:preview_markdown_auto_update = 1
+" ### slp settings ###
+let g:lsp_settings_filetype_python = 'pyls-all'
+let g:lsp_settings = {
+\   'pyls-all': {
+\     'workspace_config': {
+\       'pyls': {
+\         'configurationSources': ['flake8']
+\       }
+\     }
+\   },
+\}
 
 call dein#recache_runtimepath()
