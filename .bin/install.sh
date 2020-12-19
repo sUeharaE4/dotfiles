@@ -20,8 +20,8 @@ then
   exit
 fi
 
-echo "exec datetime: ${BACKUP_DIR}"
-echo "your dotfiles are copied to ${EXEC_DATETIME}"
+echo "exec datetime: ${EXEC_DATETIME}"
+echo "your dotfiles are copied to ${BACKUP_DIR}"
 echo "please remove backup when you feel anything alright"
 
 mkdir ${BACKUP_DIR}
