@@ -32,12 +32,15 @@ do
   || [ "$f" == ".bin" ]; then
     continue
   fi
-  if [ -f ${HOME}/$f ]; then
-    cp -RL $f ${BACKUP_DIR}/$f
-    echo "$f is copied to backup directory"
-    cp -f $f $HOME/$f
+  if [ -f $f ]; then
+    if [ -f ${HOME}/$f ]; then
+      cp -RL $f ${BACKUP_DIR}/$f
+      echo "$f is copied to backup directory"
+      cp -f $f $HOME/$f
+    fi
     ln -snfv ${DOTFILE_DIR}/$f $HOME/$f
   fi
+
   if [ -d $f ]; then
     for filepath in $(find $f -type f)
     do
