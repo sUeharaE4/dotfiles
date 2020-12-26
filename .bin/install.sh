@@ -1,7 +1,7 @@
-#/bin/bash
+#!/bin/bash
 
-DOTFILE_DIR=$(cd $(dirname $0);cd ../; pwd)
-cd ${DOTFILE_DIR}
+DOTFILE_DIR=$(cd "$(dirname "$0")" || exit 1;cd ../; pwd)
+cd "${DOTFILE_DIR}" || exit 1
 
 EXEC_DATETIME=$(date +%Y%m%d_%H%M%S)
 BACKUP_DIR=${HOME}/backup_${EXEC_DATETIME}
@@ -28,7 +28,7 @@ print_msg "exec datetime: ${EXEC_DATETIME}"
 print_msg "your dotfiles are copied to ${BACKUP_DIR}"
 print_msg "please remove backup when you feel anything alright"
 
-mkdir ${BACKUP_DIR}
+mkdir "${BACKUP_DIR}"
 
 for f in .??*
 do
@@ -36,26 +36,26 @@ do
   || [ "$f" == ".bin" ]; then
     continue
   fi
-  if [ -f $f ]; then
-    if [ -f ${HOME}/$f ]; then
-      cp -RL $f ${BACKUP_DIR}/$f
+  if [ -f "$f" ]; then
+    if [ -f "${HOME}"/"$f" ]; then
+      cp -RL "$f" "${BACKUP_DIR}"/"$f"
       print_msg "$f is copied to backup directory"
-      cp -f $f $HOME/$f
+      cp -f "$f" "$HOME"/"$f"
     fi
-    ln -snfv ${DOTFILE_DIR}/$f $HOME/$f
+    ln -snfv "${DOTFILE_DIR}"/"$f" "$HOME"/"$f"
   fi
 
-  if [ -d $f ]; then
-    for filepath in $(find $f -type f)
+  if [ -d "$f" ]; then
+    for filepath in $(find "$f" -type f)
     do
-      if [ -e ${HOME}/${filename} ]; then
-        mkdir -p ${BACKUP_DIR}/$(dirname ${filepath})
-        cp -RL ${filepath} ${BACKUP_DIR}/${filepath}
+      if [ -e "${HOME}"/"${filepath}" ]; then
+        mkdir -p "${BACKUP_DIR}"/"$(dirname "${filepath}")"
+        cp -RL "${filepath}" "${BACKUP_DIR}"/"${filepath}"
         print_msg "${filepath} is copied to backup directory"
-        mkdir -p ${HOME}/$(dirname ${filepath})
-        cp -f ${filepath} $HOME/${filepath}
+        mkdir -p "${HOME}"/"$(dirname "${filepath}")"
+        cp -f "${filepath}" "$HOME"/"${filepath}"
       fi
-      ln -snfv ${DOTFILE_DIR}/${filepath} $HOME/${filepath}
+      ln -snfv "${DOTFILE_DIR}"/"${filepath}" "$HOME"/"${filepath}"
     done
   fi
 done
@@ -63,22 +63,22 @@ done
 if ! command -v fzf &> /dev/null
 then
   print_msg "fzf could not be found. some git aliase needs fzf"
-  read -n1 -p "install fzf? [y/n] >" install_fzf
+  read -n1r -p "install fzf? [y/n] >" install_fzf
   if [[ "${install_fzf}" = [Yy] ]]; then
     git clone https://github.com/junegunn/fzf.git ~/.fzf
     ~/.fzf/install
   fi
 fi
 
-if [ ! -e ${DEIN_DIR} ]; then
+if [ ! -e "${DEIN_DIR}" ]; then
   print_msg "${DEIN_DIR} is not exists."
   print_msg "you may not have dein which plugin manager of vim."
-  read -n1 -p "install dein? [y/n] >" install_dein
+  read -n1r -p "install dein? [y/n] >" install_dein
   if [[ "${install_dein}" = [Yy] ]]; then
     curl \
     https://raw.githubusercontent.com/Shougo/dein.vim/master/bin/installer.sh \
     > dein_installer.sh
-    sh ./dein_installer.sh ${DEIN_DIR}
+    sh ./dein_installer.sh "${DEIN_DIR}"
     rm -rf ./dein_installer.sh
   fi
 fi
@@ -86,7 +86,7 @@ fi
 if ! command -v mdr &> /dev/null
 then
   print_msg "mdr could not be found. vim markdown preview is need mdr"
-  read -n1 -p "install mdr? [y/n] >" install_mdr
+  read -n1r -p "install mdr? [y/n] >" install_mdr
   if [[ "${install_mdr}" = [Yy] ]]; then
     curl -L https://github.com/MichaelMure/mdr/releases/download/v0.2.5/mdr_linux_amd64 -o mdr_linux_amd64
     sudo chmod +x mdr_linux_amd64
