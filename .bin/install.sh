@@ -98,3 +98,10 @@ then
   echo "RedHat: yum install ctags"
 fi
 
+if ! command -v shellcheck &> /dev/null
+then
+  echo "shellcheck could not be found."
+  echo "to install shellcheck run command bellow"
+  echo "Debean: apt-get install shellcheck"
+  echo "RedHat: yum install epel-release ShellCheck"
+fi
