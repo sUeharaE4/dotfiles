@@ -7,22 +7,26 @@ EXEC_DATETIME=$(date +%Y%m%d_%H%M%S)
 BACKUP_DIR=${HOME}/backup_${EXEC_DATETIME}
 DEIN_DIR=${HOME}/.cache/dein
 
+print_msg () {
+  echo "### $1"
+}
+
 # check requirements
 if ! command -v curl &> /dev/null
 then
-  echo "curl could not be found. please install before exec this script"
+  print_msg "curl could not be found. please install before exec this script"
   exit
 fi
 
 if ! command -v git &> /dev/null
 then
-  echo "git could not be found. please install before exec this script"
+  print_msg "git could not be found. please install before exec this script"
   exit
 fi
 
-echo "exec datetime: ${EXEC_DATETIME}"
-echo "your dotfiles are copied to ${BACKUP_DIR}"
-echo "please remove backup when you feel anything alright"
+print_msg "exec datetime: ${EXEC_DATETIME}"
+print_msg "your dotfiles are copied to ${BACKUP_DIR}"
+print_msg "please remove backup when you feel anything alright"
 
 mkdir ${BACKUP_DIR}
 
@@ -35,7 +39,7 @@ do
   if [ -f $f ]; then
     if [ -f ${HOME}/$f ]; then
       cp -RL $f ${BACKUP_DIR}/$f
-      echo "$f is copied to backup directory"
+      print_msg "$f is copied to backup directory"
       cp -f $f $HOME/$f
     fi
     ln -snfv ${DOTFILE_DIR}/$f $HOME/$f
@@ -47,7 +51,7 @@ do
       if [ -e ${HOME}/${filename} ]; then
         mkdir -p ${BACKUP_DIR}/$(dirname ${filepath})
         cp -RL ${filepath} ${BACKUP_DIR}/${filepath}
-        echo "${filepath} is copied to backup directory"
+        print_msg "${filepath} is copied to backup directory"
         mkdir -p ${HOME}/$(dirname ${filepath})
         cp -f ${filepath} $HOME/${filepath}
       fi
@@ -58,7 +62,7 @@ done
 
 if ! command -v fzf &> /dev/null
 then
-  echo "fzf could not be found. some git aliase needs fzf"
+  print_msg "fzf could not be found. some git aliase needs fzf"
   read -n1 -p "install fzf? [y/n] >" install_fzf
   if [[ "${install_fzf}" = [Yy] ]]; then
     git clone https://github.com/junegunn/fzf.git ~/.fzf
@@ -67,8 +71,8 @@ then
 fi
 
 if [ ! -e ${DEIN_DIR} ]; then
-  echo "${DEIN_DIR} is not exists."
-  echo "you may not have dein which plugin manager of vim."
+  print_msg "${DEIN_DIR} is not exists."
+  print_msg "you may not have dein which plugin manager of vim."
   read -n1 -p "install dein? [y/n] >" install_dein
   if [[ "${install_dein}" = [Yy] ]]; then
     curl \
@@ -81,7 +85,7 @@ fi
 
 if ! command -v mdr &> /dev/null
 then
-  echo "mdr could not be found. vim markdown preview is need mdr"
+  print_msg "mdr could not be found. vim markdown preview is need mdr"
   read -n1 -p "install mdr? [y/n] >" install_mdr
   if [[ "${install_mdr}" = [Yy] ]]; then
     curl -L https://github.com/MichaelMure/mdr/releases/download/v0.2.5/mdr_linux_amd64 -o mdr_linux_amd64
@@ -92,16 +96,16 @@ fi
 
 if ! command -v ctags &> /dev/null
 then
-  echo "ctags could not be found. vim tag jump is need ctags"
-  echo "to install ctags run command bellow"
-  echo "Debean: apt-get install exuberant-ctags"
-  echo "RedHat: yum install ctags"
+  print_msg "ctags could not be found. vim tag jump is need ctags"
+  print_msg "to install ctags run command bellow"
+  print_msg "Debean: apt-get install exuberant-ctags"
+  print_msg "RedHat: yum install ctags"
 fi
 
 if ! command -v shellcheck &> /dev/null
 then
-  echo "shellcheck could not be found."
-  echo "to install shellcheck run command bellow"
-  echo "Debean: apt-get install shellcheck"
-  echo "RedHat: yum install epel-release ShellCheck"
+  print_msg "shellcheck could not be found."
+  print_msg "to install shellcheck run command bellow"
+  print_msg "Debean: apt-get install shellcheck"
+  print_msg "RedHat: yum install epel-release ShellCheck"
 fi
