@@ -40,8 +40,8 @@ do
     if [ -f "${HOME}"/"$f" ]; then
       cp -RL "$f" "${BACKUP_DIR}"/"$f"
       print_msg "$f is copied to backup directory"
-      cp -f "$f" "$HOME"/"$f"
     fi
+    cp -f "$f" "$HOME"/"$f"
     ln -snfv "${DOTFILE_DIR}"/"$f" "$HOME"/"$f"
   fi
 
@@ -52,9 +52,9 @@ do
         mkdir -p "${BACKUP_DIR}"/"$(dirname "${filepath}")"
         cp -RL "${filepath}" "${BACKUP_DIR}"/"${filepath}"
         print_msg "${filepath} is copied to backup directory"
-        mkdir -p "${HOME}"/"$(dirname "${filepath}")"
-        cp -f "${filepath}" "$HOME"/"${filepath}"
       fi
+      mkdir -p "${HOME}"/"$(dirname "${filepath}")"
+      cp -f "${filepath}" "$HOME"/"${filepath}"
       ln -snfv "${DOTFILE_DIR}"/"${filepath}" "$HOME"/"${filepath}"
     done
   fi
@@ -63,7 +63,7 @@ done
 if ! command -v fzf &> /dev/null
 then
   print_msg "fzf could not be found. some git aliase needs fzf"
-  read -n1r -p "install fzf? [y/n] >" install_fzf
+  read -n 1 -r -p "install fzf? [y/n] >" install_fzf
   if [[ "${install_fzf}" = [Yy] ]]; then
     git clone https://github.com/junegunn/fzf.git ~/.fzf
     ~/.fzf/install
@@ -73,7 +73,7 @@ fi
 if [ ! -e "${DEIN_DIR}" ]; then
   print_msg "${DEIN_DIR} is not exists."
   print_msg "you may not have dein which plugin manager of vim."
-  read -n1r -p "install dein? [y/n] >" install_dein
+  read -n 1 -r -p "install dein? [y/n] >" install_dein
   if [[ "${install_dein}" = [Yy] ]]; then
     curl \
     https://raw.githubusercontent.com/Shougo/dein.vim/master/bin/installer.sh \
@@ -86,7 +86,7 @@ fi
 if ! command -v mdr &> /dev/null
 then
   print_msg "mdr could not be found. vim markdown preview is need mdr"
-  read -n1r -p "install mdr? [y/n] >" install_mdr
+  read -n 1 -r -p "install mdr? [y/n] >" install_mdr
   if [[ "${install_mdr}" = [Yy] ]]; then
     curl -L https://github.com/MichaelMure/mdr/releases/download/v0.2.5/mdr_linux_amd64 -o mdr_linux_amd64
     sudo chmod +x mdr_linux_amd64
