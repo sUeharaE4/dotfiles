@@ -7,6 +7,9 @@ pkglist=(
     ms-python.python
     ms-python.vscode-pylance
     njpwerner.autodocstring
+    ms-toolsai.jupyter
+    ms-toolsai.jupyter-keymap
+    ms-toolsai.jupyter-renderers
     # docker 関連(remote-containersは別)
     ms-azuretools.vscode-docker
     # markdown
@@ -24,8 +27,10 @@ pkglist=(
     CoenraadS.bracket-pair-colorizer
     # テーマ
     Equinusocio.vsc-material-theme
+    Equinusocio.vsc-community-material-theme
     # アイコン表示
     pkief.material-icon-theme
+    equinusocio.vsc-material-theme-icons
     # スペルチェック(こういうのからは卒業したいが)
     streetsidesoftware.code-spell-checker
     # ファイルパスの補完
@@ -37,6 +42,8 @@ pkglist=(
     Gruntfuggly.todo-tree
     # コンテナ利用
     ms-vscode-remote.remote-containers
+    # live share
+    ms-vsliveshare.vsliveshare
 )
 
 for i in ${pkglist[@]}; do
