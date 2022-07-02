@@ -1,5 +1,5 @@
 {
-
+    "workbench.settings.useSplitJSON": true,
     //----------------------------------------------------------
     // vscodeのeditorの設定
     //----------------------------------------------------------
@@ -134,8 +134,9 @@
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
     "python.linting.lintOnSave": true,
-    "python.condaPath": "~/miniconda3/bin",
-    "python.pythonPath": "~/miniconda3/envs/vscode-py/bin",
+    // "python.condaPath": "~/miniconda3/bin",
+    // "python.pythonPath": "~/miniconda3/envs/vscode-py/bin",
+    "python.pythonPath": "${workspaceRoot}/.venv/bin/python",
     "python.autoComplete.addBrackets": true,
     // 独自ライブラリとか参照で追加したいパス
     "python.autoComplete.extraPaths": [
@@ -150,6 +151,8 @@
     "python.languageServer": "Pylance",
     "python.analysis.extraPaths": [],
     "python.analysis.completeFunctionParens": true,
+    "python.defaultInterpreterPath": "~/miniconda3/envs/vscode-py/bin",
+    "python.envFile": "${workspaceFolder}/.venv",
 
     // 画面から設定した場合はここ以降に追加されるので適宜移動させること.
 }
