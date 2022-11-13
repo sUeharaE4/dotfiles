@@ -108,4 +108,5 @@ then
   print_msg "to install shellcheck run command bellow"
   print_msg "Debean: apt-get install shellcheck"
   print_msg "RedHat: yum install epel-release ShellCheck"
+  print_msg "macOS: brew install shellcheck"
 fi
