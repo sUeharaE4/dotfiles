@@ -110,3 +110,12 @@ then
   print_msg "RedHat: yum install epel-release ShellCheck"
   print_msg "macOS: brew install shellcheck"
 fi
+
+if ! command -v nvim &> /dev/null
+then
+  print_msg "nvim could not be found."
+  print_msg "to install neovim run command bellow"
+  print_msg "Debean: apt-get install neovim"
+  print_msg "macOS: brew install neovim --HEAD"
+fi
+
