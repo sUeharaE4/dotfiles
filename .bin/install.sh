@@ -119,3 +119,9 @@ then
   print_msg "macOS: brew install difftastic"
 fi
 
+if ! command -v rg &>/dev/null; then
+	print_msg "rg could not be found."
+	print_msg "to install ripgrep run command bellow"
+	print_msg "Debean: apt-get install ripgrep"
+	print_msg "macOS: brew install ripgrep"
+fi
