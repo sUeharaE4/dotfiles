@@ -1,4 +1,4 @@
-local Util = require("custom.util")
+local Util = require("lazyvim.util")
 
 ---@class lazyvim.util.telescope.opts
 ---@field cwd? string|boolean

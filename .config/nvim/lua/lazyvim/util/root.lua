@@ -1,4 +1,4 @@
-local Util = require("custom.util")
+local Util = require("lazyvim.util")
 
 ---@class lazyvim.util.root
 ---@overload fun(): string

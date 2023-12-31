@@ -1,19 +1,19 @@
 local LazyUtil = require("lazy.core.util")
 
----@class custom.util: LazyUtilCore
----@field ui custom.util.ui
----@field lsp custom.util.lsp
----@field root custom.util.root
----@field telescope custom.util.telescope
----@field terminal custom.util.terminal
----@field toggle custom.util.toggle
----@field format custom.util.format
----@field plugin custom.util.plugin
----@field extras custom.util.extras
----@field inject custom.util.inject
----@field news custom.util.news
----@field json custom.util.json
----@field lualine custom.util.lualine
+---@class lazyvim.util: LazyUtilCore
+---@field ui lazyvim.util.ui
+---@field lsp lazyvim.util.lsp
+---@field root lazyvim.util.root
+---@field telescope lazyvim.util.telescope
+---@field terminal lazyvim.util.terminal
+---@field toggle lazyvim.util.toggle
+---@field format lazyvim.util.format
+---@field plugin lazyvim.util.plugin
+---@field extras lazyvim.util.extras
+---@field inject lazyvim.util.inject
+---@field news lazyvim.util.news
+---@field json lazyvim.util.json
+---@field lualine lazyvim.util.lualine
 local M = {}
 
 ---@type table<string, string|string[]>
@@ -38,13 +38,13 @@ setmetatable(M, {
     if dep then
       local mod = type(dep) == "table" and dep[1] or dep
       local key = type(dep) == "table" and dep[2] or k
-      M.deprecate([[require("custom.util").]] .. k, [[require("custom.util").]] .. mod .. "." .. key)
+      M.deprecate([[require("lazyvim.util").]] .. k, [[require("lazyvim.util").]] .. mod .. "." .. key)
       ---@diagnostic disable-next-line: no-unknown
-      t[mod] = require("custom.util." .. mod) -- load here to prevent loops
+      t[mod] = require("lazyvim.util." .. mod) -- load here to prevent loops
       return t[mod][key]
     end
     ---@diagnostic disable-next-line: no-unknown
-    t[k] = require("custom.util." .. k)
+    t[k] = require("lazyvim.util." .. k)
     return t[k]
   end,
 })

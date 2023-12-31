@@ -1,4 +1,4 @@
-local Util = require("custom.util")
+local Util = require("lazyvim.util")
 
 return {
 
@@ -6,6 +6,11 @@ return {
     "nvim-neo-tree/neo-tree.nvim",
     branch = "v3.x",
     cmd = "Neotree",
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-tree/nvim-web-devicons',
+      'MunifTanjim/nui.nvim'
+    },
     keys = {
       {
         "<leader>fe",
@@ -56,6 +61,21 @@ return {
         bind_to_cwd = false,
         follow_current_file = { enabled = true },
         use_libuv_file_watcher = true,
+        filtered_items = {
+          visible = false,
+          show_hidden_count = true,
+          hide_dotfiles = false,
+          hide_gitignored = false,
+          hide_by_name = {
+            "node_modules",
+            "__pycache__",
+          },
+          never_show = {
+            ".git",
+            ".DS_Store",
+            ".history",
+          }
+        },
       },
       window = {
         mappings = {
