@@ -110,3 +110,12 @@ then
   print_msg "RedHat: yum install epel-release ShellCheck"
   print_msg "macOS: brew install shellcheck"
 fi
+
+if ! command -v difft &> /dev/null
+then
+  print_msg "difft could not be found."
+  print_msg "to install difftastic run command bellow"
+  print_msg "Debean: ### need brew please see documentation ###"
+  print_msg "macOS: brew install difftastic"
+fi
+
