@@ -405,7 +405,7 @@ end, { desc = '[/] Fuzzily search in current buffer' })
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'java' },
+    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'java', 'markdown', 'markdown_inline' },
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
@@ -534,7 +534,12 @@ require('which-key').register({
 -- mason-lspconfig requires that these setup functions are called in this order
 -- before setting up the servers.
 require('mason').setup()
-require('mason-lspconfig').setup()
+require('mason-lspconfig').setup({
+  ensure_installed = {
+    "pyright",
+    "lua_ls",
+  }
+})
 
 -- Enable the following language servers
 --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -547,7 +552,17 @@ require('mason-lspconfig').setup()
 local servers = {
   -- clangd = {},
   -- gopls = {},
-  -- pyright = {},
+  -- pyright = {
+  --   settings = {
+  --     python = {
+  --       venvPath = ".",
+  --       pythonPath = "./.venv/bin/python",
+  --       analysis = {
+  --         extraPaths = {"."}
+  --       }
+  --     }
+  --   }
+  -- },
   -- rust_analyzer = {},
   -- tsserver = {},
   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
@@ -561,6 +576,49 @@ local servers = {
     },
   },
 }
+-- setup lspconfig for python
+local configs = require('lspconfig.configs')
+require("mason-lspconfig").setup_handlers {
+  function (server_name) -- default handler (optional)
+    require("lspconfig")[server_name].setup {
+      on_attach = on_attach
+    }
+    require("lspconfig").pyright.setup{
+      settings = {
+        python = {
+          venvPath = ".",
+          pythonPath = "./.venv/bin/python",
+          analysis = {
+            extraPaths = {"."}
+          }
+        }
+      }
+    }
+  end,
+}
+if not configs.ruff_lsp then
+  configs.ruff_lsp = {
+    default_config = {
+      cmd = { 'ruff-lsp' },
+      filetypes = { 'python' },
+      root_dir = require('lspconfig').util.find_git_ancestor,
+      init_options = {
+        settings = {
+          args = {}
+        }
+      }
+    }
+  }
+end
+require('lspconfig').ruff_lsp.setup {
+  on_attach = on_attach,
+}
+
+vim.api.nvim_create_autocmd('BufWritePre', {
+  callback = function()
+    vim.lsp.buf.format()
+  end
+})
 
 -- Setup neovim lua configuration
 require('neodev').setup()
