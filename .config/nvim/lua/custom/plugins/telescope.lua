@@ -1,4 +1,4 @@
-local Util = require("custom.util")
+local Util = require("lazyvim.util")
 return {
   -- Fuzzy Finder (files, lsp, etc)
   {
