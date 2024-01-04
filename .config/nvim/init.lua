@@ -115,7 +115,7 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
+  { 'folke/which-key.nvim',  opts = {} },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -537,17 +537,7 @@ require('mason-lspconfig').setup({
 local servers = {
   -- clangd = {},
   -- gopls = {},
-  -- pyright = {
-  --   settings = {
-  --     python = {
-  --       venvPath = ".",
-  --       pythonPath = "./.venv/bin/python",
-  --       analysis = {
-  --         extraPaths = {"."}
-  --       }
-  --     }
-  --   }
-  -- },
+  -- pyright = {},
   -- rust_analyzer = {},
   -- tsserver = {},
   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
@@ -564,17 +554,17 @@ local servers = {
 -- setup lspconfig for python
 local configs = require('lspconfig.configs')
 require("mason-lspconfig").setup_handlers {
-  function (server_name) -- default handler (optional)
+  function(server_name)  -- default handler (optional)
     require("lspconfig")[server_name].setup {
       on_attach = on_attach
     }
-    require("lspconfig").pyright.setup{
+    require("lspconfig").pyright.setup {
       settings = {
         python = {
           venvPath = ".",
           pythonPath = "./.venv/bin/python",
           analysis = {
-            extraPaths = {"."}
+            extraPaths = { "." }
           }
         }
       }
