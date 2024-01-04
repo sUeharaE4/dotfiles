@@ -257,6 +257,9 @@ require('lazy').setup({
 -- Set highlight on search
 vim.o.hlsearch = false
 
+-- Set visible line to text length 80 and 120
+vim.opt.colorcolumn = { '80', '120' }
+
 -- Make line numbers default
 vim.wo.number = true
 
