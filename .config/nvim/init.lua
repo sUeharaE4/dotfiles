@@ -88,10 +88,12 @@ require("lazy").setup({
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { "j-hui/fidget.nvim", opts = {} },
+      { "j-hui/fidget.nvim",    opts = {} },
 
       -- Additional lua configuration, makes nvim stuff amazing!
       "folke/neodev.nvim",
+      -- yaml schema support
+      { "b0o/SchemaStore.nvim", lazy = true, version = false },
     },
   },
 
@@ -388,6 +390,10 @@ vim.defer_fn(function()
       "java",
       "markdown",
       "markdown_inline",
+      "json",
+      "json5",
+      "jsonc",
+      "yaml",
     },
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
@@ -522,6 +528,9 @@ require("mason-lspconfig").setup({
     "pyright",
     "lua_ls",
     "terraformls",
+    "jsonls",
+    "yamlls",
+    "yaml-language-server",
   },
 })
 
@@ -577,6 +586,36 @@ require("mason-lspconfig").setup_handlers({
       filetypes = {
         "terraform",
         "tf",
+      },
+    })
+    require("lspconfig").jsonls.setup({
+      settings = {
+        json = {
+          schemas = require("schemastore").json.schemas({
+            select = { "openapi.json", "package.json", "tsconfig.json" },
+          }),
+          validate = { enable = true },
+        },
+      },
+    })
+    require("lspconfig").yamlls.setup({
+      on_attach = on_attach,
+      capabilities = require("cmp_nvim_lsp").default_capabilities(),
+      settings = {
+        yaml = {
+          schemaStore = {
+            -- You must disable built-in schemaStore support if you want to use
+            -- this plugin and its advanced options like `ignore`.
+            enable = false,
+            -- Avoid TypeError: Cannot read properties of undefined (reading 'length')
+            url = "",
+          },
+          schemas = require("schemastore").yaml.schemas({
+            select = { "docker-compose.yml", "GitHub Action" },
+            ["https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v3.1/schema.yaml"] = "/*",
+          }),
+          validate = { enable = true },
+        },
       },
     })
   end,
