@@ -514,7 +514,8 @@ require('mason-lspconfig').setup({
   ensure_installed = {
     "pyright",
     "lua_ls",
-  }
+    "terraformls",
+  },
 })
 
 -- Enable the following language servers
@@ -555,13 +556,24 @@ require("mason-lspconfig").setup_handlers {
           venvPath = ".",
           pythonPath = "./.venv/bin/python",
           analysis = {
-            extraPaths = { "." }
-          }
-        }
-      }
-    }
+            extraPaths = { "." },
+          },
+        },
+      },
+    })
+    require("lspconfig").terraformls.setup({
+      on_attach = function()
+        client.server_capabilities.document_formatting = false
+        client.server_capabilities.document_range_formatting = false
+      end,
+      capabilities = require("cmp_nvim_lsp").default_capabilities(),
+      filetypes = {
+        "terraform",
+        "tf",
+      },
+    })
   end,
-}
+})
 if not configs.ruff_lsp then
   configs.ruff_lsp = {
     default_config = {
@@ -580,10 +592,18 @@ require('lspconfig').ruff_lsp.setup {
   on_attach = on_attach,
 }
 
-vim.api.nvim_create_autocmd('BufWritePre', {
+require("lspconfig").terraformls.setup({})
+vim.api.nvim_create_autocmd({ "BufWritePre" }, {
+  pattern = { "*.tf", "*.tfvars" },
   callback = function()
     vim.lsp.buf.format()
-  end
+  end,
+})
+
+vim.api.nvim_create_autocmd("BufWritePre", {
+  callback = function()
+    vim.lsp.buf.format()
+  end,
 })
 
 -- Setup neovim lua configuration
