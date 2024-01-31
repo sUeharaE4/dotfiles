@@ -531,6 +531,7 @@ require("mason-lspconfig").setup({
     "jsonls",
     "yamlls",
     "yaml-language-server",
+    "dockerls",
   },
 })
 
@@ -618,6 +619,7 @@ require("mason-lspconfig").setup_handlers({
         },
       },
     })
+    require("lspconfig").dockerls.setup({})
   end,
 })
 if not configs.ruff_lsp then
