@@ -315,6 +315,13 @@ require("telescope").setup({
         ["<C-d>"] = false,
       },
     },
+    pickers = {
+      live_grep = {
+        additional_args = function(opts)
+          return { "--hidden" }
+        end,
+      },
+    },
   },
 })
 
