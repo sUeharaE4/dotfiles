@@ -567,6 +567,25 @@ local servers = {
       -- diagnostics = { disable = { 'missing-fields' } },
     },
   },
+  pyright = {
+    python = {
+      venvPath = ".",
+      pythonPath = "./.venv/bin/python",
+      analysis = {
+        extraPaths = { "." },
+      },
+    },
+  },
+  jsonls = {
+    json = {
+      schemas = require("schemastore").json.schemas({
+        select = { "openapi.json", "package.json", "tsconfig.json" },
+      }),
+      validate = { enable = true },
+    },
+  },
+  dockerls = {},
+  bashls = {},
 }
 -- setup lspconfig
 local configs = require("lspconfig.configs")
@@ -575,60 +594,6 @@ require("mason-lspconfig").setup_handlers({
     require("lspconfig")[server_name].setup({
       on_attach = on_attach,
     })
-    require("lspconfig").pyright.setup({
-      settings = {
-        python = {
-          venvPath = ".",
-          pythonPath = "./.venv/bin/python",
-          analysis = {
-            extraPaths = { "." },
-          },
-        },
-      },
-    })
-    require("lspconfig").terraformls.setup({
-      on_attach = function()
-        client.server_capabilities.document_formatting = false
-        client.server_capabilities.document_range_formatting = false
-      end,
-      capabilities = require("cmp_nvim_lsp").default_capabilities(),
-      filetypes = {
-        "terraform",
-        "tf",
-      },
-    })
-    require("lspconfig").jsonls.setup({
-      settings = {
-        json = {
-          schemas = require("schemastore").json.schemas({
-            select = { "openapi.json", "package.json", "tsconfig.json" },
-          }),
-          validate = { enable = true },
-        },
-      },
-    })
-    require("lspconfig").yamlls.setup({
-      on_attach = on_attach,
-      capabilities = require("cmp_nvim_lsp").default_capabilities(),
-      settings = {
-        yaml = {
-          schemaStore = {
-            -- You must disable built-in schemaStore support if you want to use
-            -- this plugin and its advanced options like `ignore`.
-            enable = false,
-            -- Avoid TypeError: Cannot read properties of undefined (reading 'length')
-            url = "",
-          },
-          schemas = require("schemastore").yaml.schemas({
-            select = { "docker-compose.yml", "GitHub Action" },
-            ["https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v3.1/schema.yaml"] = "/*",
-          }),
-          validate = { enable = true },
-        },
-      },
-    })
-    require("lspconfig").dockerls.setup({})
-    require("lspconfig").bashls.setup({})
   end,
 })
 if not configs.ruff_lsp then
@@ -650,12 +615,43 @@ require("lspconfig").ruff_lsp.setup({
   on_attach = on_attach,
 })
 
-require("lspconfig").terraformls.setup({})
+require("lspconfig").terraformls.setup({
+  on_attach = function()
+    client.server_capabilities.document_formatting = false
+    client.server_capabilities.document_range_formatting = false
+  end,
+  capabilities = require("cmp_nvim_lsp").default_capabilities(),
+  filetypes = {
+    "terraform",
+    "tf",
+  },
+})
 vim.api.nvim_create_autocmd({ "BufWritePre" }, {
   pattern = { "*.tf", "*.tfvars" },
   callback = function()
     vim.lsp.buf.format()
   end,
+})
+
+require("lspconfig").yamlls.setup({
+  on_attach = on_attach,
+  capabilities = require("cmp_nvim_lsp").default_capabilities(),
+  settings = {
+    yaml = {
+      schemaStore = {
+        -- You must disable built-in schemaStore support if you want to use
+        -- this plugin and its advanced options like `ignore`.
+        enable = false,
+        -- Avoid TypeError: Cannot read properties of undefined (reading 'length')
+        url = "",
+      },
+      schemas = require("schemastore").yaml.schemas({
+        select = { "docker-compose.yml", "GitHub Action" },
+        ["https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v3.1/schema.yaml"] = "/*",
+      }),
+      validate = { enable = true },
+    },
+  },
 })
 
 vim.api.nvim_create_autocmd("BufWritePre", {
