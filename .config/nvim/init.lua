@@ -541,6 +541,7 @@ require("mason-lspconfig").setup({
     "dockerls",
     "bashls",
   },
+  automatic_installation = true,
 })
 
 -- Enable the following language servers
