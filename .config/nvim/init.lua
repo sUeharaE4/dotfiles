@@ -540,6 +540,8 @@ require("mason-lspconfig").setup({
     "yaml-language-server",
     "dockerls",
     "bashls",
+    "vue-language-server",
+    "typescript-language-server",
   },
   automatic_installation = true,
 })
@@ -651,6 +653,20 @@ require("lspconfig").yamlls.setup({
         ["https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v3.1/schema.yaml"] = "/*",
       }),
       validate = { enable = true },
+    },
+  },
+})
+
+local vue_typescript_plugin = require("mason-registry").get_package("vue-language-server"):get_install_path()
+    .. "/node_modules/@vue/language-server/node_modules/@vue/typescript-plugin"
+require("lspconfig").tsserver.setup({
+  init_options = {
+    plugins = {
+      {
+        name = "@vue/typescript-plugin",
+        location = vue_typescript_plugin,
+        languages = { "javascript", "typescript", "vue" },
+      },
     },
   },
 })
