@@ -559,7 +559,7 @@ local servers = {
   -- gopls = {},
   -- pyright = {},
   -- rust_analyzer = {},
-  -- tsserver = {},
+  -- ts_ls = {},
   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
 
   lua_ls = {
@@ -599,10 +599,10 @@ require("mason-lspconfig").setup_handlers({
     })
   end,
 })
-if not configs.ruff_lsp then
-  configs.ruff_lsp = {
+if not configs.ruff then
+  configs.ruff = {
     default_config = {
-      cmd = { "ruff-lsp" },
+      cmd = { "ruff", "server" },
       filetypes = { "python" },
       root_dir = require("lspconfig").util.find_git_ancestor,
       init_options = {
@@ -614,7 +614,7 @@ if not configs.ruff_lsp then
   }
 end
 
-require("lspconfig").ruff_lsp.setup({
+require("lspconfig").ruff.setup({
   on_attach = on_attach,
 })
 
@@ -659,7 +659,7 @@ require("lspconfig").yamlls.setup({
 
 local vue_typescript_plugin = require("mason-registry").get_package("vue-language-server"):get_install_path()
     .. "/node_modules/@vue/language-server/node_modules/@vue/typescript-plugin"
-require("lspconfig").tsserver.setup({
+require("lspconfig").ts_ls.setup({
   init_options = {
     plugins = {
       {
