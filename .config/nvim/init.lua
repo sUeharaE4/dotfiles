@@ -593,9 +593,18 @@ local servers = {
 -- setup lspconfig
 local configs = require("lspconfig.configs")
 require("mason-lspconfig").setup_handlers({
-  function(server_name) -- default handler (optional)
+  function(server_name)
+    -- Skip jdtls so that we don't double-start the Java LSP
+    if server_name == "jdtls" then
+      return
+    end
+
+    -- Default for everything else
     require("lspconfig")[server_name].setup({
       on_attach = on_attach,
+      capabilities = capabilities,
+      settings = servers[server_name],
+      filetypes = (servers[server_name] or {}).filetypes,
     })
   end,
 })
@@ -693,6 +702,9 @@ mason_lspconfig.setup({
 
 mason_lspconfig.setup_handlers({
   function(server_name)
+    if server_name == "jdtls" then
+      return
+    end
     require("lspconfig")[server_name].setup({
       capabilities = capabilities,
       on_attach = on_attach,
