@@ -1,0 +1,30 @@
+export PATH="$HOME/.local/bin:$PATH"
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# git
+source ~/.zsh/git-prompt.sh
+
+fpath=(~/.zsh $fpath)
+zstyle ':completion:*:*:git:*' script ~/.zsh/git-completion.bash
+autoload -Uz compinit && compinit
+
+GIT_PS1_SHOWDIRTYSTATE=true
+GIT_PS1_SHOWUNTRACKEDFILES=true
+GIT_PS1_SHOWSTASHSTATE=true
+GIT_PS1_SHOWUPSTREAM=auto
+
+setopt PROMPT_SUBST ; PS1='%F{green}%n@%m%f: %F{cyan}%~%f %F{red}$(__git_ps1 "(%s)")%f
+\$ '
+
+# set true if you want to use github copilot
+export USE_COPILOT=false
+
+# python
+if [[ -d "$HOME/.venv" ]]; then
+    source "$HOME/.local/share/python-default/.venv/bin/activate"
+else
+    echo "No virtual environment found in .venv or ~/.venv"
+    echo "Install uv and create a virtual environment to ${HOME}/.local/share/python-default/.venv"
+fi
+
