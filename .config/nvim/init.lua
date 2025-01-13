@@ -551,6 +551,7 @@ require("which-key").register({
   { "<leader>h", desc = "Git [H]unk",       mode = "v" },
 })
 
+
 -- mason-lspconfig requires that these setup functions are called in this order
 -- before setting up the servers.
 require("mason").setup()
@@ -569,6 +570,19 @@ require("mason-lspconfig").setup({
   },
   automatic_installation = true,
 })
+
+local function get_python_path(workspace)
+  local venv_path = workspace .. "/.venv/bin/python"
+  local global_venv_path = os.getenv("HOME") .. "/.global_venv/bin/python"
+
+  if vim.fn.executable(venv_path) == 1 then
+    return venv_path
+  elseif vim.fn.executable(global_venv_path) == 1 then
+    return global_venv_path
+  else
+    return vim.fn.exepath("python3") or vim.fn.exepath("python") or "python"
+  end
+end
 
 -- Enable the following language servers
 --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -592,6 +606,16 @@ local servers = {
       telemetry = { enable = false },
       -- NOTE: toggle below to ignore Lua_LS's noisy `missing-fields` warnings
       -- diagnostics = { disable = { 'missing-fields' } },
+    },
+  },
+  pyright = {
+    python = {
+      on_new_config = function(config, root_dir)
+        config.settings.python.pythonPath = get_python_path(root_dir)
+      end,
+      analysis = {
+        extraPaths = { "." },
+      },
     },
   },
   jsonls = {
