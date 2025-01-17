@@ -21,7 +21,7 @@ setopt PROMPT_SUBST ; PS1='%F{green}%n@%m%f: %F{cyan}%~%f %F{red}$(__git_ps1 "(%
 export USE_COPILOT=false
 
 # python
-if [[ -d "$HOME/.venv" ]]; then
+if [[ -d "$HOME/.local/share/python-default/.venv" ]]; then
     source "$HOME/.local/share/python-default/.venv/bin/activate"
 else
     echo "No virtual environment found in .venv or ~/.venv"
