@@ -18,6 +18,11 @@
     ps = "!f() { args=$@; [ -z \"$args\" ] && git push origin HEAD || git push $args; }; f"
     # show log graph
     lg = "!f() { args=$@; [ -z \"$args\" ] && git log --graph --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%an%C(reset)%C(bold yellow)%d%C(reset) %C(dim white)- %s%C(reset)' --all; }; f"
+    # show branches and checkout selected
+    b = "!f() { args=$@; git branch | grep -v HEAD | fzf --preview 'echo {} | cut -c 3- | xargs git log --color=always' | cut -c 3- | xargs git checkout; }; f"
+    # show branches and checkout selected with remote
+    br = "!f() { args=$@; git branch --all | grep -v HEAD | fzf --preview 'echo {} | cut -c 3- | xargs git log --color=always' | cut -c 3- | xargs git checkout; }; f"
+
 
 [diff]
   tool = difftastic
