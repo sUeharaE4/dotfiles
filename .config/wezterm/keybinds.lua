@@ -105,6 +105,9 @@ return {
       mods = "LEADER",
       action = act.ActivateKeyTable({ name = "activate_pane", timeout_milliseconds = 1000 }),
     },
+    -- create key to jump words in terminal
+    {key="LeftArrow", mods="OPT", action=wezterm.action{SendString="\x1bb"}},
+    {key="RightArrow", mods="OPT", action=wezterm.action{SendString="\x1bf"}},
   },
 
   -- https://wezfurlong.org/wezterm/config/key-tables.html
