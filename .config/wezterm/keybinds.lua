@@ -69,7 +69,7 @@ return {
 
     -- create pane
     { key = "d", mods = "LEADER", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
-    { key = "d", mods = "LEADER|SHIFT", action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
+    { key = "D", mods = "LEADER", action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
     -- close pane
     { key = "x", mods = "LEADER", action = act({ CloseCurrentPane = { confirm = true } }) },
     -- move to other pane
