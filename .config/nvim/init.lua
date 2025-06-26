@@ -44,6 +44,16 @@ P.S. You can delete this when you're done too. It's your config now :)
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+-- Initialize nodenv to ensure correct PATH for node/npm
+local nodenv_init = os.getenv("HOME") .. "/.nodenv/bin/nodenv init - --no-rehash"
+local f = io.popen(nodenv_init, "r")
+if f then
+  local output = f:read("*a")
+  f:close()
+  -- Execute the output of nodenv init to set environment variables
+  vim.cmd("silent! lua " .. vim.fn.shellescape(output))
+end
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    https://github.com/folke/lazy.nvim
 --    `:help lazy.nvim.txt` for more info
@@ -67,6 +77,7 @@ vim.opt.rtp:prepend(lazypath)
 --  You can also configure plugins after the setup call,
 --    as they will be available in your neovim runtime.
 require("lazy").setup({
+  rocks = { enabled = false },
   -- NOTE: First, some plugins that don't require any configuration
 
   -- Git related plugins
@@ -467,12 +478,6 @@ end, 0)
 -- [[ Configure LSP ]]
 --  This function gets run when an LSP connects to a particular buffer.
 local on_attach = function(_, bufnr)
-  -- NOTE: Remember that lua is a real programming language, and as such it is possible
-  -- to define small helper and utility functions so you don't have to repeat yourself
-  -- many times.
-  --
-  -- In this case, we create a function that lets us more easily define mappings specific
-  -- for LSP related items. It sets the mode, buffer and description for us each time.
   local nmap = function(keys, func, desc)
     if desc then
       desc = "LSP: " .. desc
@@ -491,11 +496,8 @@ local on_attach = function(_, bufnr)
   nmap("<leader>ds", require("telescope.builtin").lsp_document_symbols, "[D]ocument [S]ymbols")
   nmap("<leader>ws", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[W]orkspace [S]ymbols")
 
-  -- See `:help K` for why this keymap
   nmap("K", vim.lsp.buf.hover, "Hover Documentation")
-  -- nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
 
-  -- Lesser used LSP functionality
   nmap("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
   nmap("<leader>wa", vim.lsp.buf.add_workspace_folder, "[W]orkspace [A]dd Folder")
   nmap("<leader>wr", vim.lsp.buf.remove_workspace_folder, "[W]orkspace [R]emove Folder")
@@ -503,95 +505,37 @@ local on_attach = function(_, bufnr)
     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
   end, "[W]orkspace [L]ist Folders")
 
-  -- Create a command `:Format` local to the LSP buffer
   vim.api.nvim_buf_create_user_command(bufnr, "Format", function(_)
     vim.lsp.buf.format()
   end, { desc = "Format current buffer with LSP" })
 end
 
--- document existing key chains
--- require("which-key").register({
---   ["<leader>c"] = { name = "[C]ode", _ = "which_key_ignore" },
---   ["<leader>d"] = { name = "[D]ocument", _ = "which_key_ignore" },
---   ["<leader>g"] = { name = "[G]it", _ = "which_key_ignore" },
---   ["<leader>h"] = { name = "Git [H]unk", _ = "which_key_ignore" },
---   ["<leader>r"] = { name = "[R]ename", _ = "which_key_ignore" },
---   ["<leader>s"] = { name = "[S]earch", _ = "which_key_ignore" },
---   ["<leader>t"] = { name = "[T]oggle", _ = "which_key_ignore" },
---   ["<leader>w"] = { name = "[W]orkspace", _ = "which_key_ignore" },
--- })
-
+-- which-key registrations
 require("which-key").register({
   { "<leader>c",  group = "[C]ode" },
-  { "<leader>c_", hidden = true },
   { "<leader>d",  group = "[D]ocument" },
-  { "<leader>d_", hidden = true },
   { "<leader>g",  group = "[G]it" },
-  { "<leader>g_", hidden = true },
   { "<leader>h",  group = "Git [H]unk" },
-  { "<leader>h_", hidden = true },
   { "<leader>r",  group = "[R]ename" },
-  { "<leader>r_", hidden = true },
   { "<leader>s",  group = "[S]earch" },
-  { "<leader>s_", hidden = true },
   { "<leader>t",  group = "[T]oggle" },
-  { "<leader>t_", hidden = true },
   { "<leader>w",  group = "[W]orkspace" },
-  { "<leader>w_", hidden = true },
 })
--- register which-key VISUAL mode
--- required for visual <leader>hs (hunk stage) to work
--- require("which-key").register({
---   ["<leader>"] = { name = "VISUAL <leader>" },
---   ["<leader>h"] = { "Git [H]unk" },
--- }, { mode = "v" })
-
 require("which-key").register({
   { "<leader>",  group = "VISUAL <leader>", mode = "v" },
   { "<leader>h", desc = "Git [H]unk",       mode = "v" },
 })
 
--- mason-lspconfig requires that these setup functions are called in this order
--- before setting up the servers.
-require("mason").setup()
-require("mason-lspconfig").setup({
-  ensure_installed = {
-    "pyright",
-    "lua_ls",
-    "terraformls",
-    "jsonls",
-    "yamlls",
-    "yaml-language-server",
-    "dockerls",
-    "bashls",
-    "vue-language-server",
-    "typescript-language-server",
-  },
-  automatic_installation = true,
-})
+-- nvim-cmp supports additional completion capabilities, so broadcast that to servers
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 
--- Enable the following language servers
---  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
---
---  Add any additional override configuration in the following tables. They will be passed to
---  the `settings` field of the server config. You must look up that documentation yourself.
---
---  If you want to override the default filetypes that your language server will attach to you can
---  define the property 'filetypes' to the map in question.
+-- Language server settings
 local servers = {
-  -- clangd = {},
-  -- gopls = {},
-  -- pyright = {},
-  -- rust_analyzer = {},
-  -- ts_ls = {},
-  -- html = { filetypes = { 'html', 'twig', 'hbs'} },
-
   lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
       telemetry = { enable = false },
-      -- NOTE: toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-      -- diagnostics = { disable = { 'missing-fields' } },
     },
   },
   jsonls = {
@@ -605,24 +549,41 @@ local servers = {
   dockerls = {},
   bashls = {},
 }
--- setup lspconfig
-local configs = require("lspconfig.configs")
-require("mason-lspconfig").setup_handlers({
-  function(server_name)
-    -- Skip jdtls so that we don't double-start the Java LSP
-    if server_name == "jdtls" then
-      return
-    end
 
-    -- Default for everything else
-    require("lspconfig")[server_name].setup({
-      on_attach = on_attach,
-      capabilities = capabilities,
-      settings = servers[server_name],
-      filetypes = (servers[server_name] or {}).filetypes,
-    })
-  end,
+-- Setup mason and mason-lspconfig
+require("mason").setup()
+require("mason-lspconfig").setup({
+  ensure_installed = {
+    "pyright",
+    "lua_ls",
+    "terraformls",
+    "jsonls",
+    "yamlls",
+    "yaml-language-server",
+    "dockerls",
+    "bashls",
+    "vetur-vls",
+    "typescript-language-server",
+  },
+  automatic_installation = true,
+  handlers = {
+    -- Default handler
+    function(server_name)
+      if server_name == "jdtls" then
+        return
+      end
+      require("lspconfig")[server_name].setup({
+        on_attach = on_attach,
+        capabilities = capabilities,
+        settings = servers[server_name],
+        filetypes = (servers[server_name] or {}).filetypes,
+      })
+    end,
+  },
 })
+
+-- Custom LSP setups
+local configs = require("lspconfig.configs")
 if not configs.ruff then
   configs.ruff = {
     default_config = {
@@ -637,27 +598,20 @@ if not configs.ruff then
     },
   }
 end
-
-require("lspconfig").ruff.setup({
-  on_attach = on_attach,
-})
+require("lspconfig").ruff.setup({ on_attach = on_attach })
 
 require("lspconfig").terraformls.setup({
-  on_attach = function()
+  on_attach = function(client, bufnr)
+    on_attach(client, bufnr) -- Call the original on_attach
     client.server_capabilities.document_formatting = false
     client.server_capabilities.document_range_formatting = false
   end,
   capabilities = require("cmp_nvim_lsp").default_capabilities(),
-  filetypes = {
-    "terraform",
-    "tf",
-  },
+  filetypes = { "terraform", "tf" },
 })
 vim.api.nvim_create_autocmd({ "BufWritePre" }, {
   pattern = { "*.tf", "*.tfvars" },
-  callback = function()
-    vim.lsp.buf.format()
-  end,
+  callback = function() vim.lsp.buf.format() end,
 })
 
 require("lspconfig").yamlls.setup({
@@ -666,10 +620,7 @@ require("lspconfig").yamlls.setup({
   settings = {
     yaml = {
       schemaStore = {
-        -- You must disable built-in schemaStore support if you want to use
-        -- this plugin and its advanced options like `ignore`.
         enable = false,
-        -- Avoid TypeError: Cannot read properties of undefined (reading 'length')
         url = "",
       },
       schemas = require("schemastore").yaml.schemas({
@@ -681,27 +632,12 @@ require("lspconfig").yamlls.setup({
   },
 })
 
-local vue_typescript_plugin = require("mason-registry").get_package("vue-language-server"):get_install_path()
-    .. "/node_modules/@vue/language-server/node_modules/@vue/typescript-plugin"
-require("lspconfig").ts_ls.setup({
-  init_options = {
-    plugins = {
-      {
-        name = "@vue/typescript-plugin",
-        location = vue_typescript_plugin,
-        languages = { "javascript", "typescript", "vue" },
-      },
-    },
-  },
-})
+
 
 vim.api.nvim_create_autocmd("BufWritePre", {
-  callback = function()
-    vim.lsp.buf.format()
-  end,
+  callback = function() vim.lsp.buf.format() end,
 })
 
--- Setup neovim lua configuration
 require("neodev").setup()
 
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
@@ -713,20 +649,19 @@ local mason_lspconfig = require("mason-lspconfig")
 
 mason_lspconfig.setup({
   ensure_installed = vim.tbl_keys(servers),
-})
-
-mason_lspconfig.setup_handlers({
-  function(server_name)
-    if server_name == "jdtls" then
-      return
-    end
-    require("lspconfig")[server_name].setup({
-      capabilities = capabilities,
-      on_attach = on_attach,
-      settings = servers[server_name],
-      filetypes = (servers[server_name] or {}).filetypes,
-    })
-  end,
+  handlers = {
+    function(server_name)
+      if server_name == "jdtls" then
+        return
+      end
+      require("lspconfig")[server_name].setup({
+        capabilities = capabilities,
+        on_attach = on_attach,
+        settings = servers[server_name],
+        filetypes = (servers[server_name] or {}).filetypes,
+      })
+    end,
+  },
 })
 
 -- [[ Configure nvim-cmp ]]
