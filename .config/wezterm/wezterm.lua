@@ -65,7 +65,11 @@ config.foreground_text_hsb = {
 }
 
 -- tab
+config.show_new_tab_button_in_tab_bar = false
+config.show_close_tab_button_in_tabs = false
+
 -- window related
+-- config.window_decorations = "RESIZE"
 -- config.window_frame = {
 --   inactive_titlebar_bg = "#44475A",
 --   active_titlebar_bg = "#BD93F9",
