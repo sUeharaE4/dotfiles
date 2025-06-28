@@ -18,8 +18,13 @@ setopt PROMPT_SUBST ; PS1='%F{green}%n@%m%f: %F{cyan}%~%f %F{red}$(__git_ps1 "(%
 \$ '
 
 # zsh plugins
-# NOTE: to use these plugins, you need to clone git repo in ~/.zsh
-# and also need to install zsh-autosuggestions and zsh-syntax-highlightin
+# NOTE: to use these plugins, you need to clone git repos in ~/.zsh .
+# go to ~/.zsh, run following command:
+# `git clone https://github.com/zsh-users/zsh-autosuggestions.git`
+# `git clone https://github.com/zsh-users/zsh-syntax-highlighting.git`
+# `git clone https://github.com/zdharma-continuum/fast-syntax-highlighting.git`
+# `git clone --depth 1 -- https://github.com/marlonrichert/zsh-autocomplete.git`
+# and also need to install zsh-autosuggestions and zsh-syntax-highlightin by homebrew or somethig like that
 source ~/.zsh/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh
 source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
