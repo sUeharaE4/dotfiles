@@ -17,7 +17,20 @@ GIT_PS1_SHOWUPSTREAM=auto
 setopt PROMPT_SUBST ; PS1='%F{green}%n@%m%f: %F{cyan}%~%f %F{red}$(__git_ps1 "(%s)")%f
 \$ '
 
-# set true if you want to use github copilot
+# zsh plugins
+# NOTE: to use these plugins, you need to clone git repos in ~/.zsh .
+# go to ~/.zsh, run following command:
+# `git clone https://github.com/zsh-users/zsh-autosuggestions.git`
+# `git clone https://github.com/zsh-users/zsh-syntax-highlighting.git`
+# `git clone https://github.com/zdharma-continuum/fast-syntax-highlighting.git`
+# `git clone --depth 1 -- https://github.com/marlonrichert/zsh-autocomplete.git`
+# and also need to install zsh-autosuggestions and zsh-syntax-highlightin by homebrew or somethig like that
+source ~/.zsh/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting fast-syntax-highlighting zsh-autocomplete)
+
+# set true if you want to use github copilot in neovim
 export USE_COPILOT=false
 
 # python
@@ -26,6 +39,7 @@ if [[ -d "$HOME/.local/share/python-default/.venv" ]]; then
 else
     echo "No virtual environment found in .venv or ~/.venv"
     echo "Install uv and create a virtual environment to ${HOME}/.local/share/python-default/.venv"
+    echo "`uv venv --seed` is required if you want to use pip."
 fi
 
 # util commands
