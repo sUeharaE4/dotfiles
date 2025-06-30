@@ -35,7 +35,12 @@ export USE_COPILOT=false
 
 # python
 if [[ -d "$HOME/.local/share/python-default/.venv" ]]; then
-    source "$HOME/.local/share/python-default/.venv/bin/activate"
+    # if no venv is activated, activate default venv
+    if [[ -z "$VIRTUAL_ENV" ]]; then
+        source "$HOME/.local/share/python-default/.venv/bin/activate"
+    else
+        source "$VIRTUAL_ENV/bin/activate"
+    fi
 else
     echo "No virtual environment found in .venv or ~/.venv"
     echo "Install uv and create a virtual environment to ${HOME}/.local/share/python-default/.venv"
