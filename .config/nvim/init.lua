@@ -736,8 +736,18 @@ require("lspconfig").yamlls.setup({
   },
 })
 
-local vue_typescript_plugin = require("mason-registry").get_package("vue-language-server"):get_install_path()
-    .. "/node_modules/@vue/language-server/node_modules/@vue/typescript-plugin"
+local mason_root = require("mason.settings").current.install_root_dir
+local vue_typescript_plugin = table.concat({
+  mason_root,
+  "packages",
+  "vue-language-server",
+  "node_modules",
+  "@vue",
+  "language-server",
+  "node_modules",
+  "@vue",
+  "typescript-plugin",
+}, "/")
 require("lspconfig").ts_ls.setup({
   init_options = {
     plugins = {
