@@ -69,38 +69,85 @@ return {
                 -- How to run jdtls. This can be overridden to a full java command-line
                 -- if the Python wrapper script doesn't suffice.
                 cmd = { vim.fn.exepath("jdtls") },
-                full_cmd = function(opts)
-                    local fname = vim.api.nvim_buf_get_name(0)
-                    local root_dir = opts.root_dir(fname)
-                    local project_name = opts.project_name(root_dir)
-                    local jdtls_root = vim.fn.stdpath("data") .. "/mason/packages/jdtls"
-                    local equinox_launcher = vim.fn.glob(jdtls_root .. "/plugins/org.eclipse.equinox.launcher_*.jar")
-                    -- local cmd = vim.deepcopy(opts.cmd)
-                    local cmd = { "java" }
-                    if project_name then
-                        vim.list_extend(cmd, {
-                            "-javaagent:" ..
-                            -- "-javaagent:" .. "/Users/suehara/.m2/repository/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar",
-                            jdtls_root .. "/lombok.jar",
-                            "-Declipse.application=org.eclipse.jdt.ls.core.id1",
-                            "-Dosgi.bundles.defaultStartLevel=4",
-                            "-Declipse.product=org.eclipse.jdt.ls.core.product",
-                            -- "--add-modules=ALL-SYSTEM",
-                            -- "--add-modules=jdk.incubator.foreign",
-                            -- "--add-modules=jdk.incubator.vector",
-                            "--add-opens", "java.base/java.util=ALL-UNNAMED",
-                            "--add-opens", "java.base/java.lang=ALL-UNNAMED",
-
-                            "-jar", equinox_launcher,
-
-                            "-configuration",
-                            -- opts.jdtls_config_dir(project_name),
-                            jdtls_root .. "/config_mac",
-                            "-data",
-                            opts.jdtls_workspace_dir(project_name),
-                        })
+                full_cmd = function(opts, fname)
+                    fname = fname or vim.api.nvim_buf_get_name(0)
+                    local root_dir = opts.root_dir and opts.root_dir(fname) or nil
+                    if not root_dir or root_dir == "" then
+                        root_dir = vim.loop.cwd()
                     end
-                    return cmd
+
+                    local project_name = opts.project_name and opts.project_name(root_dir) or nil
+                    if not project_name or project_name == "" then
+                        project_name = vim.fs.basename(root_dir)
+                    end
+                    if not project_name or project_name == "" then
+                        local fallback_source = fname ~= "" and fname or root_dir
+                        project_name = vim.fn.fnamemodify(fallback_source, ":p:h:t")
+                    end
+                    if not project_name or project_name == "" then
+                        project_name = "default"
+                    end
+
+                    local java_version_output = vim.fn.systemlist(opts.cmd[1] .. " -version 2>&1")
+                    local version_line = java_version_output[1] or ""
+                    local major_version = version_line:match('version "(%d+)')
+                    if major_version and tonumber(major_version) < 21 then
+                        vim.notify(
+                            string.format(
+                                "nvim-jdtls requires Java 21 or newer. Current '%s -version' reports: %s",
+                                opts.cmd[1],
+                                version_line
+                            ),
+                            vim.log.levels.ERROR
+                        )
+                        return opts.cmd, root_dir
+                    end
+
+                    local jdtls_root = vim.fn.stdpath("data") .. "/mason/packages/jdtls"
+                    local equinox_launcher = vim.fn.glob(jdtls_root .. "/plugins/org.eclipse.equinox.launcher_*.jar", true)
+                    equinox_launcher = vim.split(equinox_launcher, "\n", { plain = true })[1] or ""
+
+                    if equinox_launcher == "" then
+                        vim.notify("Could not locate the Eclipse Equinox launcher for jdtls.", vim.log.levels.ERROR)
+                        return { "java" }, root_dir
+                    end
+
+                    local uname = vim.loop.os_uname().sysname
+                    local platform_config = "config_linux"
+                    if uname == "Darwin" then
+                        platform_config = "config_mac"
+                    elseif uname == "Windows_NT" then
+                        platform_config = "config_win"
+                    end
+
+                    local default_config_dir = table.concat({ jdtls_root, platform_config }, "/")
+                    local config_dir = opts.jdtls_config_dir and opts.jdtls_config_dir(project_name) or nil
+                    if config_dir and config_dir ~= "" then
+                        if vim.fn.glob(config_dir .. "/config.ini") == "" then
+                            config_dir = default_config_dir
+                        end
+                    else
+                        config_dir = default_config_dir
+                    end
+
+                    local workspace_dir = opts.jdtls_workspace_dir(project_name)
+                    if workspace_dir and workspace_dir ~= "" then
+                        vim.fn.mkdir(workspace_dir, "p")
+                    end
+
+                    local cmd = { "java" }
+                    vim.list_extend(cmd, {
+                        "-javaagent:" .. jdtls_root .. "/lombok.jar",
+                        "-Declipse.application=org.eclipse.jdt.ls.core.id1",
+                        "-Dosgi.bundles.defaultStartLevel=4",
+                        "-Declipse.product=org.eclipse.jdt.ls.core.product",
+                        "--add-opens", "java.base/java.util=ALL-UNNAMED",
+                        "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+                        "-jar", equinox_launcher,
+                        "-configuration", config_dir,
+                        "-data", workspace_dir,
+                    })
+                    return cmd, root_dir
                 end,
 
                 -- These depend on nvim-dap, but can additionally be disabled by setting false here.
@@ -114,25 +161,35 @@ return {
             -- Find the extra bundles that should be passed on the jdtls command-line
             -- if nvim-dap is enabled with java debug/test.
             local mason_registry = require("mason-registry")
-            local bundles = {} ---@type string[]
-            if opts.dap and Util.has("nvim-dap") and mason_registry.is_installed("java-debug-adapter") then
-                local java_dbg_pkg = mason_registry.get_package("java-debug-adapter")
-                local java_dbg_path = java_dbg_pkg:get_install_path()
-                local jar_patterns = {
-                    java_dbg_path .. "/extension/server/com.microsoft.java.debug.plugin-*.jar",
-                }
-                -- java-test also depends on java-debug-adapter.
-                if opts.test and mason_registry.is_installed("java-test") then
-                    local java_test_pkg = mason_registry.get_package("java-test")
-                    local java_test_path = java_test_pkg:get_install_path()
-                    vim.list_extend(jar_patterns, {
-                        java_test_path .. "/extension/server/*.jar",
-                    })
+            local mason_settings = require("mason.settings")
+            local mason_root = mason_settings.current.install_root_dir
+
+            local function package_install_path(pkg_name)
+                local ok, pkg = pcall(mason_registry.get_package, pkg_name)
+                if not ok then
+                    return nil
                 end
-                for _, jar_pattern in ipairs(jar_patterns) do
-                    for _, bundle in ipairs(vim.split(vim.fn.glob(jar_pattern), "\n")) do
+                return table.concat({ mason_root, "packages", pkg.name }, "/")
+            end
+
+            local bundles = {} ---@type string[]
+            local function add_bundles_from(pattern)
+                if not pattern then
+                    return
+                end
+                for _, bundle in ipairs(vim.split(vim.fn.glob(pattern), "\n")) do
+                    if bundle ~= "" then
                         table.insert(bundles, bundle)
                     end
+                end
+            end
+            if opts.dap and Util.has("nvim-dap") and mason_registry.is_installed("java-debug-adapter") then
+                local java_dbg_path = package_install_path("java-debug-adapter")
+                add_bundles_from(java_dbg_path and (java_dbg_path .. "/extension/server/com.microsoft.java.debug.plugin-*.jar"))
+                -- java-test also depends on java-debug-adapter.
+                if opts.test and mason_registry.is_installed("java-test") then
+                    local java_test_path = package_install_path("java-test")
+                    add_bundles_from(java_test_path and (java_test_path .. "/extension/server/*.jar"))
                 end
             end
 
@@ -140,9 +197,12 @@ return {
                 local fname = vim.api.nvim_buf_get_name(0)
 
                 -- Configuration can be augmented and overridden by opts.jdtls
+                local full_cmd, resolved_root = opts.full_cmd(opts, fname)
+                resolved_root = resolved_root or opts.root_dir(fname) or vim.loop.cwd()
+
                 local config = extend_or_override({
-                    cmd = opts.full_cmd(opts),
-                    root_dir = opts.root_dir(fname),
+                    cmd = full_cmd,
+                    root_dir = resolved_root,
                     init_options = {
                         bundles = bundles,
                     },
