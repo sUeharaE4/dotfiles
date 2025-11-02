@@ -551,23 +551,40 @@ require("which-key").register({
   { "<leader>h", desc = "Git [H]unk",       mode = "v" },
 })
 
+-- Setup neovim lua configuration
+require("neodev").setup()
+
+-- nvim-cmp supports additional completion capabilities, so broadcast that to servers
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
+
 -- mason-lspconfig requires that these setup functions are called in this order
 -- before setting up the servers.
 require("mason").setup()
-require("mason-lspconfig").setup({
-  ensure_installed = {
-    "pyright",
-    "lua_ls",
-    "terraformls",
-    "jsonls",
-    "yamlls",
-    "yaml-language-server",
-    "dockerls",
-    "bashls",
-    "vue-language-server",
-    "typescript-language-server",
-  },
-  automatic_installation = true,
+
+local mason_lspconfig = require("mason-lspconfig")
+local ensure_installed = {
+  "bashls",
+  "dockerls",
+  "jsonls",
+  "lua_ls",
+  "pyright",
+  "terraformls",
+  "ts_ls",
+  "volar",
+  "yamlls",
+}
+
+local manual_setup = {
+  terraformls = true,
+  ts_ls = true,
+  volar = true,
+  yamlls = true,
+}
+
+mason_lspconfig.setup({
+  ensure_installed = ensure_installed,
+  automatic_enable = false,
 })
 
 -- Enable the following language servers
@@ -606,23 +623,61 @@ local servers = {
   bashls = {},
 }
 -- setup lspconfig
+local lspconfig = require("lspconfig")
 local configs = require("lspconfig.configs")
-require("mason-lspconfig").setup_handlers({
-  function(server_name)
-    -- Skip jdtls so that we don't double-start the Java LSP
-    if server_name == "jdtls" then
-      return
-    end
 
-    -- Default for everything else
-    require("lspconfig")[server_name].setup({
-      on_attach = on_attach,
-      capabilities = capabilities,
-      settings = servers[server_name],
-      filetypes = (servers[server_name] or {}).filetypes,
-    })
-  end,
-})
+local function setup_server(server_name)
+  if manual_setup[server_name] then
+    return
+  end
+
+  if server_name == "jdtls" then
+    return
+  end
+
+  local server = lspconfig[server_name]
+  if not server then
+    return
+  end
+
+  local server_settings = servers[server_name]
+  local filetypes = nil
+
+  if server_settings then
+    server_settings = vim.tbl_deep_extend("force", {}, server_settings)
+    if server_settings.filetypes then
+      filetypes = server_settings.filetypes
+      server_settings.filetypes = nil
+    end
+  end
+
+  server.setup({
+    on_attach = on_attach,
+    capabilities = capabilities,
+    settings = server_settings,
+    filetypes = filetypes,
+  })
+end
+
+local configured = {}
+for _, server_name in ipairs(mason_lspconfig.get_installed_servers()) do
+  setup_server(server_name)
+  configured[server_name] = true
+end
+
+for _, server_name in ipairs(ensure_installed) do
+  if not configured[server_name] then
+    setup_server(server_name)
+    configured[server_name] = true
+  end
+end
+
+for server_name in pairs(servers) do
+  if not configured[server_name] then
+    setup_server(server_name)
+    configured[server_name] = true
+  end
+end
 if not configs.ruff then
   configs.ruff = {
     default_config = {
@@ -698,34 +753,6 @@ require("lspconfig").ts_ls.setup({
 vim.api.nvim_create_autocmd("BufWritePre", {
   callback = function()
     vim.lsp.buf.format()
-  end,
-})
-
--- Setup neovim lua configuration
-require("neodev").setup()
-
--- nvim-cmp supports additional completion capabilities, so broadcast that to servers
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
-
--- Ensure the servers above are installed
-local mason_lspconfig = require("mason-lspconfig")
-
-mason_lspconfig.setup({
-  ensure_installed = vim.tbl_keys(servers),
-})
-
-mason_lspconfig.setup_handlers({
-  function(server_name)
-    if server_name == "jdtls" then
-      return
-    end
-    require("lspconfig")[server_name].setup({
-      capabilities = capabilities,
-      on_attach = on_attach,
-      settings = servers[server_name],
-      filetypes = (servers[server_name] or {}).filetypes,
-    })
   end,
 })
 
