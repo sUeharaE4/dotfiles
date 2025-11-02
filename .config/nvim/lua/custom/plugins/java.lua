@@ -17,6 +17,37 @@ local function extend_or_override(config, custom, ...)
     return config
 end
 
+local java_info = {
+    exec = nil,
+    ok = nil,
+    message = nil,
+    warned = false,
+}
+
+local function resolve_java_exec()
+    if java_info.exec ~= nil then
+        return java_info.exec
+    end
+
+    local candidate = nil
+    if vim.env.JAVA_HOME and vim.env.JAVA_HOME ~= "" then
+        local home_exec = vim.env.JAVA_HOME .. "/bin/java"
+        if vim.fn.executable(home_exec) == 1 then
+            candidate = home_exec
+        end
+    end
+
+    if not candidate then
+        local path_exec = vim.fn.exepath("java")
+        if path_exec ~= "" then
+            candidate = path_exec
+        end
+    end
+
+    java_info.exec = candidate
+    return java_info.exec
+end
+
 return {
     -- Add java to treesitter.
     {
@@ -88,19 +119,40 @@ return {
                         project_name = "default"
                     end
 
-                    local java_version_output = vim.fn.systemlist(opts.cmd[1] .. " -version 2>&1")
-                    local version_line = java_version_output[1] or ""
-                    local major_version = version_line:match('version "(%d+)')
-                    if major_version and tonumber(major_version) < 21 then
+                    local java_exec = resolve_java_exec()
+                    if not java_exec then
                         vim.notify(
-                            string.format(
-                                "nvim-jdtls requires Java 21 or newer. Current '%s -version' reports: %s",
-                                opts.cmd[1],
-                                version_line
-                            ),
+                            "Unable to locate a Java executable in PATH or via JAVA_HOME. Skipping jdtls startup.",
                             vim.log.levels.ERROR
                         )
-                        return opts.cmd, root_dir
+                        return nil, root_dir
+                    end
+
+                    if java_info.ok == nil then
+                        local version_output = vim.fn.systemlist(java_exec .. " -version 2>&1")
+                        local version_line = version_output[1] or version_output[2] or ""
+                        local version_number = version_line:match('version "([%d%.]+)')
+                        local major_version = version_number and version_number:match('^(%d+)')
+                        if major_version and tonumber(major_version) < 21 then
+                            java_info.ok = false
+                            java_info.message = string.format(
+                                "jdtls requires Java 21+. Detected %s (%s)",
+                                java_exec,
+                                version_line
+                            )
+                            java_info.warned = false
+                        else
+                            java_info.ok = true
+                            java_info.warned = false
+                        end
+                    end
+
+                    if java_info.ok == false then
+                        if not java_info.warned then
+                            vim.notify(java_info.message, vim.log.levels.ERROR)
+                            java_info.warned = true
+                        end
+                        return nil, root_dir
                     end
 
                     local jdtls_root = vim.fn.stdpath("data") .. "/mason/packages/jdtls"
@@ -109,7 +161,7 @@ return {
 
                     if equinox_launcher == "" then
                         vim.notify("Could not locate the Eclipse Equinox launcher for jdtls.", vim.log.levels.ERROR)
-                        return { "java" }, root_dir
+                        return nil, root_dir
                     end
 
                     local uname = vim.loop.os_uname().sysname
@@ -135,7 +187,7 @@ return {
                         vim.fn.mkdir(workspace_dir, "p")
                     end
 
-                    local cmd = { "java" }
+                    local cmd = { java_exec }
                     vim.list_extend(cmd, {
                         "-javaagent:" .. jdtls_root .. "/lombok.jar",
                         "-Declipse.application=org.eclipse.jdt.ls.core.id1",
@@ -198,6 +250,9 @@ return {
 
                 -- Configuration can be augmented and overridden by opts.jdtls
                 local full_cmd, resolved_root = opts.full_cmd(opts, fname)
+                if not full_cmd then
+                    return
+                end
                 resolved_root = resolved_root or opts.root_dir(fname) or vim.loop.cwd()
 
                 local config = extend_or_override({
