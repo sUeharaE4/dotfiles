@@ -522,23 +522,15 @@ end
 -- })
 
 require("which-key").register({
-  { "<leader>c",  group = "[C]ode" },
-  { "<leader>c_", hidden = true },
-  { "<leader>d",  group = "[D]ocument" },
-  { "<leader>d_", hidden = true },
-  { "<leader>g",  group = "[G]it" },
-  { "<leader>g_", hidden = true },
-  { "<leader>h",  group = "Git [H]unk" },
-  { "<leader>h_", hidden = true },
-  { "<leader>r",  group = "[R]ename" },
-  { "<leader>r_", hidden = true },
-  { "<leader>s",  group = "[S]earch" },
-  { "<leader>s_", hidden = true },
-  { "<leader>t",  group = "[T]oggle" },
-  { "<leader>t_", hidden = true },
-  { "<leader>w",  group = "[W]orkspace" },
-  { "<leader>w_", hidden = true },
-})
+  { "<leader>c", group = "[C]ode" },
+  { "<leader>d", group = "[D]ocument" },
+  { "<leader>g", group = "[G]it" },
+  { "<leader>h", group = "Git [H]unk" },
+  { "<leader>r", group = "[R]ename" },
+  { "<leader>s", group = "[S]earch" },
+  { "<leader>t", group = "[T]oggle" },
+  { "<leader>w", group = "[W]orkspace" },
+}, { mode = "n" })
 -- register which-key VISUAL mode
 -- required for visual <leader>hs (hunk stage) to work
 -- require("which-key").register({
@@ -547,27 +539,48 @@ require("which-key").register({
 -- }, { mode = "v" })
 
 require("which-key").register({
-  { "<leader>",  group = "VISUAL <leader>", mode = "v" },
-  { "<leader>h", desc = "Git [H]unk",       mode = "v" },
+  { "<leader>", group = "VISUAL <leader>", mode = "v" },
+  { "<leader>h", desc = "Git [H]unk", mode = "v" },
 })
+
+-- Setup neovim lua configuration
+require("neodev").setup()
+
+-- nvim-cmp supports additional completion capabilities, so broadcast that to servers
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
+
+local lsp = vim.lsp
 
 -- mason-lspconfig requires that these setup functions are called in this order
 -- before setting up the servers.
 require("mason").setup()
-require("mason-lspconfig").setup({
-  ensure_installed = {
-    "pyright",
-    "lua_ls",
-    "terraformls",
-    "jsonls",
-    "yamlls",
-    "yaml-language-server",
-    "dockerls",
-    "bashls",
-    "vue-language-server",
-    "typescript-language-server",
-  },
-  automatic_installation = true,
+
+local mason_settings = require("mason.settings")
+local mason_lspconfig = require("mason-lspconfig")
+local ensure_installed = {
+  "bashls",
+  "dockerls",
+  "jsonls",
+  "lua_ls",
+  "pyright",
+  "ruff",
+  "terraformls",
+  "ts_ls",
+  "vue_ls",
+  "yamlls",
+}
+
+local manual_setup = {
+  jdtls = true,
+  terraformls = true,
+  ts_ls = true,
+  yamlls = true,
+}
+
+mason_lspconfig.setup({
+  ensure_installed = ensure_installed,
+  automatic_enable = false,
 })
 
 -- Enable the following language servers
@@ -605,54 +618,92 @@ local servers = {
   dockerls = {},
   bashls = {},
 }
--- setup lspconfig
-local configs = require("lspconfig.configs")
-require("mason-lspconfig").setup_handlers({
-  function(server_name)
-    -- Skip jdtls so that we don't double-start the Java LSP
-    if server_name == "jdtls" then
-      return
-    end
 
-    -- Default for everything else
-    require("lspconfig")[server_name].setup({
-      on_attach = on_attach,
-      capabilities = capabilities,
-      settings = servers[server_name],
-      filetypes = (servers[server_name] or {}).filetypes,
-    })
-  end,
+-- Provide defaults that every server will receive.
+lsp.config('*', {
+  on_attach = on_attach,
+  capabilities = capabilities,
 })
-if not configs.ruff then
-  configs.ruff = {
-    default_config = {
-      cmd = { "ruff", "server" },
-      filetypes = { "python" },
-      root_dir = require("lspconfig").util.find_git_ancestor,
-      init_options = {
-        settings = {
-          args = {},
-        },
-      },
-    },
-  }
+
+local function clone_settings(settings)
+  if not settings then
+    return nil
+  end
+  return vim.tbl_deep_extend("force", {}, settings)
 end
 
-require("lspconfig").ruff.setup({
-  on_attach = on_attach,
-})
+local function configure_server(name, opts)
+  opts = opts or {}
 
-require("lspconfig").terraformls.setup({
-  on_attach = function()
+  if opts.settings and vim.tbl_isempty(opts.settings) then
+    opts.settings = nil
+  end
+
+  if opts.filetypes and vim.tbl_isempty(opts.filetypes) then
+    opts.filetypes = nil
+  end
+
+  if next(opts) then
+    lsp.config(name, opts)
+  end
+
+  lsp.enable(name)
+end
+
+local servers_to_manage = {}
+
+for _, server_name in ipairs(mason_lspconfig.get_installed_servers()) do
+  servers_to_manage[server_name] = true
+end
+
+for _, server_name in ipairs(ensure_installed) do
+  servers_to_manage[server_name] = true
+end
+
+for server_name in pairs(servers) do
+  servers_to_manage[server_name] = true
+end
+
+local sorted_servers = vim.tbl_keys(servers_to_manage)
+table.sort(sorted_servers)
+
+for _, server_name in ipairs(sorted_servers) do
+  if not manual_setup[server_name] then
+    local server_settings = clone_settings(servers[server_name])
+    local filetypes = nil
+
+    if server_settings and server_settings.filetypes then
+      filetypes = server_settings.filetypes
+      server_settings.filetypes = nil
+    end
+
+    configure_server(server_name, {
+      settings = server_settings,
+      filetypes = filetypes,
+    })
+  end
+end
+
+local function with_on_attach(extra)
+  return function(client, bufnr)
+    on_attach(client, bufnr)
+    if extra then
+      extra(client, bufnr)
+    end
+  end
+end
+
+configure_server("terraformls", {
+  on_attach = with_on_attach(function(client)
     client.server_capabilities.document_formatting = false
     client.server_capabilities.document_range_formatting = false
-  end,
-  capabilities = require("cmp_nvim_lsp").default_capabilities(),
+  end),
   filetypes = {
     "terraform",
     "tf",
   },
 })
+
 vim.api.nvim_create_autocmd({ "BufWritePre" }, {
   pattern = { "*.tf", "*.tfvars" },
   callback = function()
@@ -660,9 +711,7 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
   end,
 })
 
-require("lspconfig").yamlls.setup({
-  on_attach = on_attach,
-  capabilities = require("cmp_nvim_lsp").default_capabilities(),
+configure_server("yamlls", {
   settings = {
     yaml = {
       schemaStore = {
@@ -681,9 +730,20 @@ require("lspconfig").yamlls.setup({
   },
 })
 
-local vue_typescript_plugin = require("mason-registry").get_package("vue-language-server"):get_install_path()
-    .. "/node_modules/@vue/language-server/node_modules/@vue/typescript-plugin"
-require("lspconfig").ts_ls.setup({
+local mason_root = mason_settings.current.install_root_dir
+local vue_typescript_plugin = table.concat({
+  mason_root,
+  "packages",
+  "vue-language-server",
+  "node_modules",
+  "@vue",
+  "language-server",
+  "node_modules",
+  "@vue",
+  "typescript-plugin",
+}, "/")
+
+configure_server("ts_ls", {
   init_options = {
     plugins = {
       {
@@ -698,34 +758,6 @@ require("lspconfig").ts_ls.setup({
 vim.api.nvim_create_autocmd("BufWritePre", {
   callback = function()
     vim.lsp.buf.format()
-  end,
-})
-
--- Setup neovim lua configuration
-require("neodev").setup()
-
--- nvim-cmp supports additional completion capabilities, so broadcast that to servers
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
-
--- Ensure the servers above are installed
-local mason_lspconfig = require("mason-lspconfig")
-
-mason_lspconfig.setup({
-  ensure_installed = vim.tbl_keys(servers),
-})
-
-mason_lspconfig.setup_handlers({
-  function(server_name)
-    if server_name == "jdtls" then
-      return
-    end
-    require("lspconfig")[server_name].setup({
-      capabilities = capabilities,
-      on_attach = on_attach,
-      settings = servers[server_name],
-      filetypes = (servers[server_name] or {}).filetypes,
-    })
   end,
 })
 
