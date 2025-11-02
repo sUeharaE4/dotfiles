@@ -558,10 +558,13 @@ require("neodev").setup()
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 
+local lsp = vim.lsp
+
 -- mason-lspconfig requires that these setup functions are called in this order
 -- before setting up the servers.
 require("mason").setup()
 
+local mason_settings = require("mason.settings")
 local mason_lspconfig = require("mason-lspconfig")
 local ensure_installed = {
   "bashls",
@@ -569,16 +572,17 @@ local ensure_installed = {
   "jsonls",
   "lua_ls",
   "pyright",
+  "ruff",
   "terraformls",
   "ts_ls",
-  "volar",
+  "vue_ls",
   "yamlls",
 }
 
 local manual_setup = {
+  jdtls = true,
   terraformls = true,
   ts_ls = true,
-  volar = true,
   yamlls = true,
 }
 
@@ -622,92 +626,92 @@ local servers = {
   dockerls = {},
   bashls = {},
 }
--- setup lspconfig
-local lspconfig = require("lspconfig")
-local configs = require("lspconfig.configs")
 
-local function setup_server(server_name)
-  if manual_setup[server_name] then
-    return
+-- Provide defaults that every server will receive.
+lsp.config('*', {
+  on_attach = on_attach,
+  capabilities = capabilities,
+})
+
+local function clone_settings(settings)
+  if not settings then
+    return nil
   end
-
-  if server_name == "jdtls" then
-    return
-  end
-
-  local server = lspconfig[server_name]
-  if not server then
-    return
-  end
-
-  local server_settings = servers[server_name]
-  local filetypes = nil
-
-  if server_settings then
-    server_settings = vim.tbl_deep_extend("force", {}, server_settings)
-    if server_settings.filetypes then
-      filetypes = server_settings.filetypes
-      server_settings.filetypes = nil
-    end
-  end
-
-  server.setup({
-    on_attach = on_attach,
-    capabilities = capabilities,
-    settings = server_settings,
-    filetypes = filetypes,
-  })
+  return vim.tbl_deep_extend("force", {}, settings)
 end
 
-local configured = {}
+local function configure_server(name, opts)
+  opts = opts or {}
+
+  if opts.settings and vim.tbl_isempty(opts.settings) then
+    opts.settings = nil
+  end
+
+  if opts.filetypes and vim.tbl_isempty(opts.filetypes) then
+    opts.filetypes = nil
+  end
+
+  if next(opts) then
+    lsp.config(name, opts)
+  end
+
+  lsp.enable(name)
+end
+
+local servers_to_manage = {}
+
 for _, server_name in ipairs(mason_lspconfig.get_installed_servers()) do
-  setup_server(server_name)
-  configured[server_name] = true
+  servers_to_manage[server_name] = true
 end
 
 for _, server_name in ipairs(ensure_installed) do
-  if not configured[server_name] then
-    setup_server(server_name)
-    configured[server_name] = true
-  end
+  servers_to_manage[server_name] = true
 end
 
 for server_name in pairs(servers) do
-  if not configured[server_name] then
-    setup_server(server_name)
-    configured[server_name] = true
+  servers_to_manage[server_name] = true
+end
+
+local sorted_servers = vim.tbl_keys(servers_to_manage)
+table.sort(sorted_servers)
+
+for _, server_name in ipairs(sorted_servers) do
+  if not manual_setup[server_name] then
+    local server_settings = clone_settings(servers[server_name])
+    local filetypes = nil
+
+    if server_settings and server_settings.filetypes then
+      filetypes = server_settings.filetypes
+      server_settings.filetypes = nil
+    end
+
+    configure_server(server_name, {
+      settings = server_settings,
+      filetypes = filetypes,
+    })
   end
 end
-if not configs.ruff then
-  configs.ruff = {
-    default_config = {
-      cmd = { "ruff", "server" },
-      filetypes = { "python" },
-      root_dir = require("lspconfig").util.find_git_ancestor,
-      init_options = {
-        settings = {
-          args = {},
-        },
-      },
-    },
-  }
+
+local function with_on_attach(extra)
+  return function(client, bufnr)
+    on_attach(client, bufnr)
+    if extra then
+      extra(client, bufnr)
+    end
+  end
 end
 
-require("lspconfig").ruff.setup({
-  on_attach = on_attach,
-})
-
-require("lspconfig").terraformls.setup({
-  on_attach = function()
+configure_server("terraformls", {
+  on_attach = with_on_attach(function(client)
     client.server_capabilities.document_formatting = false
     client.server_capabilities.document_range_formatting = false
-  end,
-  capabilities = require("cmp_nvim_lsp").default_capabilities(),
+  end),
   filetypes = {
     "terraform",
     "tf",
   },
 })
+
 vim.api.nvim_create_autocmd({ "BufWritePre" }, {
   pattern = { "*.tf", "*.tfvars" },
   callback = function()
@@ -715,9 +719,7 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
   end,
 })
 
-require("lspconfig").yamlls.setup({
-  on_attach = on_attach,
-  capabilities = require("cmp_nvim_lsp").default_capabilities(),
+configure_server("yamlls", {
   settings = {
     yaml = {
       schemaStore = {
@@ -736,7 +738,7 @@ require("lspconfig").yamlls.setup({
   },
 })
 
-local mason_root = require("mason.settings").current.install_root_dir
+local mason_root = mason_settings.current.install_root_dir
 local vue_typescript_plugin = table.concat({
   mason_root,
   "packages",
@@ -748,7 +750,8 @@ local vue_typescript_plugin = table.concat({
   "@vue",
   "typescript-plugin",
 }, "/")
-require("lspconfig").ts_ls.setup({
+
+configure_server("ts_ls", {
   init_options = {
     plugins = {
       {
