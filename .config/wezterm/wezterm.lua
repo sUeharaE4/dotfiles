@@ -34,8 +34,13 @@ config.exit_behavior = 'CloseOnCleanExit'
 config.color_scheme = "Vs Code Dark+ (Gogh)"
 
 -- background
-config.window_background_opacity = 0.95
+config.window_background_opacity = 0.8
 config.macos_window_background_blur = 10
+
+config.inactive_pane_hsb = {
+    saturation = 0.9,
+    brightness = 0.5,
+}
 
 -- font related
 config.font_size=16
