@@ -1,14 +1,42 @@
-model = "gpt-5-codex"
+model = "gpt-5.5"
 model_reasoning_effort = "high"
-hide_agent_reasoning = false
+personality = "pragmatic"
+approval_policy = "on-request"
+approvals_reviewer = "auto_review"
+
+[projects."/Users/suehara/dotfiles"]
+trust_level = "trusted"
+
+[projects."/Users/suehara/agent/ai_music_practice_tool"]
+trust_level = "trusted"
+
+[projects."/Users/suehara/pythonPrograming/ai-music-menter"]
+trust_level = "trusted"
+
+[sandbox_workspace_write]
 network_access = true
 
-notify = ["bash", "-lc", "afplay /System/Library/Sounds/Ping.aiff"]
+[mcp_servers.spec-workflow]
 
-[tools]
-web_search = true
+command = "npx"
+args = ["-y", "@pimzino/spec-workflow-mcp@latest","."]
+startup_timeout_ms = 30000
 
-[mcp_servers.serena]
-command = "uvx"
-args = ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "codex"]
+[tui]
+status_line = ["model-with-reasoning", "current-dir", "context-remaining"]
 
+[tui.model_availability_nux]
+"gpt-5.5" = 4
+
+[features]
+apps = false
+codex_hooks = true
+
+[[hooks.PermissionRequest]]
+matcher = "^Bash$"
+
+[[hooks.PermissionRequest.hooks]]
+type = "command"
+command = '/usr/bin/python3 "$HOME/.codex/hooks/permission_request.py"'
+timeout = 5
+statusMessage = "Checking command approval policy"
