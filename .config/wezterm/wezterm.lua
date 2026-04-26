@@ -42,19 +42,16 @@ config.inactive_pane_hsb = {
 
 -- font related
 config.font_size = 16
-config.font = wezterm.font(
--- "Moralerspace Argon HWNF",
-    "JetBrains Mono",
+config.font = wezterm.font_with_fallback({
     {
+        family = "JetBrains Mono",
         stretch = "Normal",
         weight = "Regular",
-        bold = false,
-        italic = false,
-    }
-)
-config.harfbuzz_features = { "calt=0", "clig=0", "liga=0" }
+        harfbuzz_features = { "calt=0", "clig=0", "liga=0" },
+    },
+    { family = "Hiragino Sans", scale = 1.25 },
+})
 config.text_background_opacity = 0.95
-config.font_size = 16
 config.cell_width = 1.0
 config.line_height = 1.0
 config.use_cap_height_to_scale_fallback_fonts = true
